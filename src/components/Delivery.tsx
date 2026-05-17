@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getActiveMenuItems } from "../utils/menu";
+import type { MenuItem } from "../data/menuItems";
 
 const areas = [
   { name: "Select Your Area", km: 0 },
@@ -13,26 +15,16 @@ const areas = [
   { name: "Whitefield", km: 13 },
 ];
 
-const deliveryItems = [
-  { name: "Hyderabadi Chicken Dum Biryani", price: 230 },
-  { name: "Boneless Chicken Biryani", price: 260 },
-  { name: "Prawns Biryani", price: 280 },
-  { name: "Mutton Dum Biryani", price: 350 },
-  { name: "Dragon Chicken", price: 260 },
-  { name: "Chicken Kebab", price: 200 },
-  { name: "Pepper Chicken", price: 220 },
-  { name: "Apollo Fish", price: 250 },
-  { name: "Paneer Butter Masala", price: 220 },
-  { name: "Chicken Fried Rice", price: 165 },
-  { name: "Chicken Noodles", price: 160 },
-  { name: "Gulab Jamoon", price: 35 },
-];
-
 export default function Delivery() {
+  const [items, setItems] = useState<MenuItem[]>([]);
   const [selectedArea, setSelectedArea] = useState(areas[0]);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [paymentDone, setPaymentDone] = useState(false);
   const [cart, setCart] = useState<{ [key: string]: number }>({});
+
+  useEffect(() => {
+    setItems(getActiveMenuItems());
+  }, []);
 
   const addItem = (name: string) => {
     setCart((prev) => ({
@@ -50,7 +42,7 @@ export default function Delivery() {
     setPaymentDone(false);
   };
 
-  const itemsTotal = deliveryItems.reduce((total, item) => {
+  const itemsTotal = items.reduce((total, item) => {
     return total + item.price * (cart[item.name] || 0);
   }, 0);
 
@@ -98,9 +90,9 @@ export default function Delivery() {
             </h3>
 
             <div className="space-y-5 max-h-[650px] overflow-y-auto pr-1 sm:pr-2">
-              {deliveryItems.map((item) => (
+              {items.map((item) => (
                 <div
-                  key={item.name}
+                  key={item.id}
                   className="bg-white text-black p-4 sm:p-5 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-5"
                 >
                   <div>
@@ -198,11 +190,11 @@ export default function Delivery() {
                     Order Summary
                   </h3>
 
-                  {deliveryItems.map(
+                  {items.map(
                     (item) =>
                       cart[item.name] > 0 && (
                         <div
-                          key={item.name}
+                          key={item.id}
                           className="flex justify-between gap-5 text-base md:text-lg"
                         >
                           <span>
@@ -258,7 +250,10 @@ export default function Delivery() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-6">
                     <button
-                      onClick={() => setPaymentMethod("Pay On Delivery")}
+                      onClick={() => {
+                        setPaymentMethod("Pay On Delivery");
+                        setPaymentDone(false);
+                      }}
                       className={`p-5 rounded-2xl font-black text-base md:text-lg ${
                         paymentMethod === "Pay On Delivery"
                           ? "bg-black text-white"
@@ -269,7 +264,10 @@ export default function Delivery() {
                     </button>
 
                     <button
-                      onClick={() => setPaymentMethod("Online UPI")}
+                      onClick={() => {
+                        setPaymentMethod("Online UPI");
+                        setPaymentDone(false);
+                      }}
                       className={`p-5 rounded-2xl font-black text-base md:text-lg ${
                         paymentMethod === "Online UPI"
                           ? "bg-black text-white"

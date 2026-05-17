@@ -1,136 +1,27 @@
 "use client";
 
-import { useState } from "react";
-
-type Dish = {
-  name: string;
-  price: number;
-  category: string;
-  image: string;
-};
-
-const img = {
-  biryani:
-    "https://images.unsplash.com/photo-1563379091339-03246963d96c?q=80&w=1200",
-  chicken:
-    "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=1200",
-  kebab:
-    "https://images.unsplash.com/photo-1529042410759-befb1204b468?q=80&w=1200",
-  mutton:
-    "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?q=80&w=1200",
-  fish:
-    "https://images.unsplash.com/photo-1611171711914-bf4f0c4f0f7d?q=80&w=1200",
-  prawns:
-    "https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=1200",
-  paneer:
-    "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?q=80&w=1200",
-  veg:
-    "https://images.unsplash.com/photo-1626804475297-41608ea09aeb?q=80&w=1200",
-  rice:
-    "https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=1200",
-  noodles:
-    "https://images.unsplash.com/photo-1617093727343-374698b1b08d?q=80&w=1200",
-  soup:
-    "https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=1200",
-  dessert:
-    "https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=1200",
-  drink:
-    "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?q=80&w=1200",
-  bread:
-    "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?q=80&w=1200",
-  meals:
-    "https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=1200",
-};
-
-const dishes: Dish[] = [
-  { name: "Veg Biryani", price: 190, category: "Biryani", image: img.biryani },
-  { name: "Paneer Biryani", price: 220, category: "Biryani", image: img.biryani },
-  { name: "Mushroom Biryani", price: 190, category: "Biryani", image: img.biryani },
-  { name: "Kaaju Biryani", price: 220, category: "Biryani", image: img.biryani },
-  { name: "Hyderabadi Chicken Dum Biryani", price: 230, category: "Biryani", image: img.biryani },
-  { name: "Boneless Chicken Biryani", price: 260, category: "Biryani", image: img.biryani },
-  { name: "Fry Piece Biryani", price: 230, category: "Biryani", image: img.biryani },
-  { name: "Kebab Biryani", price: 230, category: "Biryani", image: img.biryani },
-  { name: "Fish Biryani", price: 230, category: "Biryani", image: img.fish },
-  { name: "Gongura Chicken Biryani", price: 240, category: "Biryani", image: img.biryani },
-  { name: "Prawns Biryani", price: 280, category: "Biryani", image: img.prawns },
-  { name: "Egg Biryani", price: 180, category: "Biryani", image: img.biryani },
-  { name: "Mutton Dum Biryani", price: 350, category: "Biryani", image: img.mutton },
-  { name: "Niku's Special Biryani", price: 250, category: "Biryani", image: img.biryani },
-
-  { name: "Chicken Curry", price: 220, category: "Main Course", image: img.chicken },
-  { name: "Kadai Chicken", price: 220, category: "Main Course", image: img.chicken },
-  { name: "Butter Chicken", price: 230, category: "Main Course", image: img.chicken },
-  { name: "Chicken Hyderabadi", price: 220, category: "Main Course", image: img.chicken },
-  { name: "Gongura Chicken Curry", price: 230, category: "Main Course", image: img.chicken },
-  { name: "Mutton Masala", price: 340, category: "Main Course", image: img.mutton },
-  { name: "Mutton Guntur Gravy", price: 350, category: "Main Course", image: img.mutton },
-  { name: "Fish Curry", price: 230, category: "Main Course", image: img.fish },
-  { name: "Prawns Curry", price: 280, category: "Main Course", image: img.prawns },
-
-  { name: "Dragon Chicken", price: 260, category: "Starters", image: img.chicken },
-  { name: "Chicken Kebab", price: 200, category: "Starters", image: img.kebab },
-  { name: "Chicken Lollipop", price: 210, category: "Starters", image: img.kebab },
-  { name: "Pepper Chicken", price: 220, category: "Starters", image: img.chicken },
-  { name: "Chilli Chicken", price: 220, category: "Starters", image: img.chicken },
-  { name: "Gongura Chicken", price: 220, category: "Starters", image: img.chicken },
-  { name: "Apollo Fish", price: 250, category: "Starters", image: img.fish },
-  { name: "Fish Pepper", price: 230, category: "Starters", image: img.fish },
-  { name: "Prawns Chilli", price: 270, category: "Starters", image: img.prawns },
-  { name: "Prawns Ghee Roast", price: 280, category: "Starters", image: img.prawns },
-
-  { name: "Paneer Butter Masala", price: 220, category: "Veg", image: img.paneer },
-  { name: "Kadai Paneer", price: 220, category: "Veg", image: img.paneer },
-  { name: "Palak Paneer", price: 230, category: "Veg", image: img.paneer },
-  { name: "Mushroom Masala", price: 200, category: "Veg", image: img.veg },
-  { name: "Veg Kolhapuri", price: 220, category: "Veg", image: img.veg },
-
-  { name: "Gobi Chilli", price: 180, category: "Veg Starters", image: img.veg },
-  { name: "Gobi 65", price: 180, category: "Veg Starters", image: img.veg },
-  { name: "Veg Manchurian", price: 180, category: "Veg Starters", image: img.veg },
-  { name: "Paneer Chilli", price: 220, category: "Veg Starters", image: img.paneer },
-
-  { name: "Chicken Fried Rice", price: 165, category: "Rice & Noodles", image: img.rice },
-  { name: "Chicken Noodles", price: 160, category: "Rice & Noodles", image: img.noodles },
-  { name: "Egg Fried Rice", price: 145, category: "Rice & Noodles", image: img.rice },
-  { name: "Veg Fried Rice", price: 155, category: "Rice & Noodles", image: img.rice },
-  { name: "Veg Noodles", price: 140, category: "Rice & Noodles", image: img.noodles },
-
-  { name: "Chapati 2 Pcs", price: 50, category: "Bread & Meals", image: img.bread },
-  { name: "Parota 2 Pcs", price: 60, category: "Bread & Meals", image: img.bread },
-  { name: "Full Meals", price: 180, category: "Bread & Meals", image: img.meals },
-  { name: "Non Veg Meals", price: 260, category: "Bread & Meals", image: img.meals },
-  { name: "Fish Meals", price: 250, category: "Bread & Meals", image: img.meals },
-
-  { name: "Cream of Tomato Soup", price: 100, category: "Soups", image: img.soup },
-  { name: "Sweet Corn Veg Soup", price: 100, category: "Soups", image: img.soup },
-  { name: "Hot & Sour Chicken Soup", price: 120, category: "Soups", image: img.soup },
-
-  { name: "Gulab Jamoon", price: 35, category: "Desserts", image: img.dessert },
-  { name: "Carrot Halwa", price: 45, category: "Desserts", image: img.dessert },
-  { name: "Kheer", price: 45, category: "Desserts", image: img.dessert },
-
-  { name: "Water Bottle", price: 20, category: "Beverages", image: img.drink },
-  { name: "Soft Drink", price: 25, category: "Beverages", image: img.drink },
-  { name: "Lime Soda", price: 40, category: "Beverages", image: img.drink },
-  { name: "Butter Milk", price: 30, category: "Beverages", image: img.drink },
-  { name: "Sweet Lassi", price: 50, category: "Beverages", image: img.drink },
-  { name: "Chocolate Milkshake", price: 100, category: "Beverages", image: img.drink },
-];
-
-const categories = [
-  "All",
-  ...Array.from(new Set(dishes.map((dish) => dish.category))),
-];
+import { useEffect, useState } from "react";
+import { getActiveMenuItems } from "../utils/menu";
+import type { MenuItem } from "../data/menuItems";
 
 export default function Specials() {
+  const [items, setItems] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<{ [key: string]: number }>({});
   const [selectedCategory, setSelectedCategory] = useState("");
 
+  useEffect(() => {
+    setItems(getActiveMenuItems());
+  }, []);
+
+  const categories = [
+    "All",
+    ...Array.from(new Set(items.map((item) => item.category))),
+  ];
+
   const filteredDishes =
     selectedCategory === "All"
-      ? dishes
-      : dishes.filter((dish) => dish.category === selectedCategory);
+      ? items
+      : items.filter((item) => item.category === selectedCategory);
 
   const addItem = (name: string) => {
     setCart((prev) => ({
@@ -146,7 +37,7 @@ export default function Specials() {
     }));
   };
 
-  const subtotal = dishes.reduce((total, item) => {
+  const subtotal = items.reduce((total, item) => {
     return total + item.price * (cart[item.name] || 0);
   }, 0);
 
@@ -207,7 +98,7 @@ export default function Specials() {
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-10">
             {filteredDishes.map((dish, index) => (
               <div
-                key={index}
+                key={dish.id || index}
                 className="bg-white rounded-[24px] md:rounded-[30px] overflow-hidden shadow-2xl hover:scale-[1.02] transition duration-300"
               >
                 <div className="relative">
