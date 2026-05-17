@@ -1,68 +1,137 @@
+const galleryImages = [
+  {
+    title: "Hyderabadi Dum Biryani",
+    category: "Biryani",
+    image:
+      "https://images.unsplash.com/photo-1701579231349-d7459c40919d?q=80&w=1200",
+  },
+  {
+    title: "Spicy Chicken Curry",
+    category: "Curries",
+    image:
+      "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=1200",
+  },
+  {
+    title: "Chicken Starters",
+    category: "Starters",
+    image:
+      "https://images.unsplash.com/photo-1529042410759-befb1204b468?q=80&w=1200",
+  },
+  {
+    title: "Mutton Special",
+    category: "Mutton",
+    image:
+      "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?q=80&w=1200",
+  },
+{
+  title: "Prawns Special",
+  category: "Seafood",
+  image:
+    "https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=1200",
+},
+  {
+    title: "Paneer Butter Masala",
+    category: "Veg",
+    image:
+      "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?q=80&w=1200",
+  },
+  {
+    title: "Veg Curry",
+    category: "Veg",
+    image:
+      "https://images.unsplash.com/photo-1626804475297-41608ea09aeb?q=80&w=1200",
+  },
+  {
+    title: "Fried Rice",
+    category: "Chinese",
+    image:
+      "https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=1200",
+  },
+  {
+    title: "Noodles",
+    category: "Chinese",
+    image:
+      "https://images.unsplash.com/photo-1617093727343-374698b1b08d?q=80&w=1200",
+  },
+  {
+    title: "Soup",
+    category: "Soups",
+    image:
+      "https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=1200",
+  },
+  {
+    title: "Desserts",
+    category: "Desserts",
+    image:
+      "https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=1200",
+  },
+];
+
 export default function Gallery() {
-
-  const images = [
-
-    "https://images.unsplash.com/photo-1563379091339-03246963d96c?q=80&w=1200",
-
-    "https://images.unsplash.com/photo-1701579231349-d7459c40919d?q=80&w=1200",
-
-    "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=1200",
-
-    "https://images.unsplash.com/photo-1529042410759-befb1204b468?q=80&w=1200",
-
-    "https://images.unsplash.com/photo-1625944525533-473f1cb7d3b2?q=80&w=1200",
-
-    "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?q=80&w=1200",
-
-  ];
-
   return (
-
-    <section
-      id="gallery"
-      className="bg-black py-24 px-6"
-    >
-
+    <section id="gallery" className="bg-black py-28 px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
-
         <div className="text-center mb-20">
-
-          <p className="uppercase tracking-[0.3em] text-orange-400 font-bold">
+          <p className="text-orange-400 uppercase tracking-[0.4em] font-black text-sm">
             Food Gallery
           </p>
 
-          <h2 className="text-6xl font-black text-white mt-6">
-            DELICIOUS
+          <h2 className="text-5xl md:text-7xl font-black text-white mt-6">
+            PREMIUM FOOD
             <br />
-            FOOD MOMENTS
+            MOMENTS
           </h2>
 
+          <p className="text-gray-400 text-lg mt-6 max-w-2xl mx-auto">
+            A visual taste of Nikus Andhra Kitchen — biryanis, curries,
+            starters, seafood, desserts and more.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-
-          {images.map((image, index) => (
-
+        <div className="grid md:grid-cols-4 gap-6">
+          {galleryImages.map((item, index) => (
             <div
               key={index}
-              className="overflow-hidden rounded-[30px] shadow-2xl group"
+              className={`relative group overflow-hidden rounded-[32px] shadow-2xl ${
+                index === 0 || index === 5 ? "md:col-span-2 md:row-span-2" : ""
+              }`}
             >
-
               <img
-                src={image}
-                alt="Food"
-                className="w-full h-[350px] object-cover group-hover:scale-110 transition duration-500"
+                src={item.image}
+                alt={item.title}
+                className={`w-full object-cover group-hover:scale-110 transition duration-700 ${
+                  index === 0 || index === 5 ? "h-[520px]" : "h-[250px]"
+                }`}
               />
 
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90"></div>
+
+              <div className="absolute top-5 left-5 bg-orange-500 text-black px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest">
+                {item.category}
+              </div>
+
+              <div className="absolute bottom-6 left-6 right-6">
+                <h3 className="text-white text-2xl font-black">
+                  {item.title}
+                </h3>
+
+                <p className="text-gray-300 mt-2">
+                  Authentic Andhra flavour, served fresh.
+                </p>
+              </div>
             </div>
-
           ))}
-
         </div>
 
+        <div className="mt-16 text-center">
+          <a
+            href="#menu"
+            className="inline-block bg-orange-500 text-black px-10 py-5 rounded-full font-black text-lg hover:scale-105"
+          >
+            Explore Full Menu
+          </a>
+        </div>
       </div>
-
     </section>
-
   );
 }
