@@ -11,34 +11,50 @@ import Footer from "../components/Footer";
 
 export default function Home() {
   return (
-    <main className="bg-orange-500 overflow-x-hidden">
+    <main className="bg-orange-500 overflow-x-hidden w-full min-h-screen">
 
       {/* NAVBAR */}
       <Navbar />
 
-      {/* HERO SECTION */}
-      <Hero />
+      {/* HERO */}
+      <section className="relative">
+        <Hero />
+      </section>
 
-      {/* ABOUT SECTION */}
-      <About />
+      {/* ABOUT */}
+      <section className="relative">
+        <About />
+      </section>
 
-      {/* MENU / ORDER SECTION */}
-      <Specials />
+      {/* MENU */}
+      <section className="relative">
+        <Specials />
+      </section>
 
-      {/* TABLE BOOKING */}
-      <Reservation />
+      {/* RESERVATION */}
+      <section className="relative">
+        <Reservation />
+      </section>
 
-      {/* FOOD GALLERY */}
-      <Gallery />
+      {/* GALLERY */}
+      <section className="relative">
+        <Gallery />
+      </section>
 
-      {/* DELIVERY SECTION */}
-      <Delivery />
+      {/* DELIVERY */}
+      <section className="relative">
+        <Delivery />
+      </section>
 
-      {/* CONTACT SECTION */}
-      <Contact />
+      {/* CONTACT */}
+      <section className="relative">
+        <Contact />
+      </section>
 
-      {/* STATS SECTION */}
-      <Stats />
+      {/* STATS */}
+      <section className="relative">
+        <Stats />
+      </section>
 
       {/* FOOTER */}
       <Footer />

@@ -1,176 +1,107 @@
 @import "tailwindcss";
 
 :root {
-
   --background: #000000;
   --foreground: #ffffff;
-
   --orange: #ff7a00;
-
 }
 
 @theme inline {
-
   --color-background: var(--background);
-
   --color-foreground: var(--foreground);
-
   --font-sans: var(--font-geist-sans);
-
   --font-mono: var(--font-geist-mono);
-
 }
 
 html {
-
   scroll-behavior: smooth;
-
+  overflow-x: hidden;
 }
 
 body {
-
   background: var(--background);
-
   color: var(--foreground);
-
   font-family: Arial, Helvetica, sans-serif;
-
   overflow-x: hidden;
-
+  width: 100%;
 }
-
-/* PREMIUM SCROLLBAR */
-
-::-webkit-scrollbar {
-
-  width: 10px;
-
-}
-
-::-webkit-scrollbar-track {
-
-  background: #111111;
-
-}
-
-::-webkit-scrollbar-thumb {
-
-  background: var(--orange);
-
-  border-radius: 999px;
-
-}
-
-/* PREMIUM TEXT SELECTION */
-
-::selection {
-
-  background: var(--orange);
-
-  color: black;
-
-}
-
-/* SMOOTH TRANSITIONS */
 
 * {
-
+  box-sizing: border-box;
   transition:
     background-color 0.3s ease,
     color 0.3s ease,
     border-color 0.3s ease,
     transform 0.3s ease;
-
 }
 
-/* BUTTONS */
-
-button {
-
+button,
+a {
   cursor: pointer;
-
 }
-
-/* IMAGES */
 
 img {
-
   user-select: none;
-
+  max-width: 100%;
 }
-
-/* PREMIUM CONTAINER */
-
-.container-premium {
-
-  width: 100%;
-
-  max-width: 1400px;
-
-  margin-inline: auto;
-
-  padding-inline: 24px;
-
-}
-
-/* GLASS EFFECT */
-
-.glass {
-
-  background: rgba(255,255,255,0.08);
-
-  backdrop-filter: blur(14px);
-
-  border: 1px solid rgba(255,255,255,0.1);
-
-}
-
-/* PREMIUM SHADOW */
-
-.shadow-premium {
-
-  box-shadow:
-    0 10px 40px rgba(0,0,0,0.5);
-
-}
-
-/* ORANGE GRADIENT */
-
-.orange-gradient {
-
-  background:
-    linear-gradient(
-      135deg,
-      #ff7a00,
-      #ff4d00
-    );
-
-}
-
-/* HOVER SCALE */
-
-.hover-scale:hover {
-
-  transform: scale(1.03);
-
-}
-
-/* PREMIUM SECTION SPACING */
 
 section {
-
   position: relative;
-
 }
 
-/* MOBILE OPTIMIZATION */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--orange);
+  border-radius: 999px;
+}
+
+::selection {
+  background: var(--orange);
+  color: black;
+}
+
+.container-premium {
+  width: 100%;
+  max-width: 1400px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.glass {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.shadow-premium {
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.orange-gradient {
+  background: linear-gradient(135deg, #ff7a00, #ff4d00);
+}
+
+.hover-scale:hover {
+  transform: scale(1.03);
+}
 
 @media (max-width: 768px) {
-
-  h1 {
-
-    line-height: 1.1;
-
+  .container-premium {
+    padding-inline: 16px;
   }
 
+  h1 {
+    line-height: 1.1;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
 }
