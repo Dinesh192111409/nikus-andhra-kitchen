@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const navLinks = [
   { name: "MENU", href: "#menu" },
@@ -11,19 +11,6 @@ const navLinks = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    setIsCustomerLoggedIn(!!localStorage.getItem("nikus_customer"));
-  }, []);
-
-  const customerLogout = () => {
-    localStorage.removeItem("nikus_customer");
-    setIsCustomerLoggedIn(false);
-    window.location.href = "/";
-  };
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-black via-[#1a1a1a] to-[#e85d04] shadow-2xl border-b border-orange-500/20 backdrop-blur-xl">
@@ -73,22 +60,12 @@ export default function Navbar() {
             CART
           </a>
 
-          {mounted &&
-            (isCustomerLoggedIn ? (
-              <button
-                onClick={customerLogout}
-                className="bg-black border border-orange-400 text-white px-5 py-3 rounded-full font-black hover:bg-orange-500 hover:text-black transition duration-300 hover:scale-105"
-              >
-                SIGN OUT
-              </button>
-            ) : (
-              <a
-                href="/"
-                className="bg-black border border-orange-400 text-white px-5 py-3 rounded-full font-black hover:bg-orange-500 hover:text-black transition duration-300 hover:scale-105"
-              >
-                LOGIN
-              </a>
-            ))}
+          <a
+            href="/owner-dashboard"
+            className="bg-black border border-orange-400 text-white px-5 py-3 rounded-full font-black hover:bg-orange-500 hover:text-black transition duration-300 hover:scale-105"
+          >
+            OWNER
+          </a>
         </div>
 
         <button
@@ -130,23 +107,13 @@ export default function Navbar() {
               CART
             </a>
 
-            {mounted &&
-              (isCustomerLoggedIn ? (
-                <button
-                  onClick={customerLogout}
-                  className="bg-black border border-orange-400 text-white px-6 py-4 rounded-full text-center font-black"
-                >
-                  SIGN OUT
-                </button>
-              ) : (
-                <a
-                  href="/"
-                  onClick={() => setOpen(false)}
-                  className="bg-black border border-orange-400 text-white px-6 py-4 rounded-full text-center font-black"
-                >
-                  LOGIN
-                </a>
-              ))}
+            <a
+              href="/owner-dashboard"
+              onClick={() => setOpen(false)}
+              className="bg-black border border-orange-400 text-white px-6 py-4 rounded-full text-center font-black"
+            >
+              OWNER DASHBOARD
+            </a>
           </nav>
         </div>
       )}

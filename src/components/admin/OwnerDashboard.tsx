@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { menuItems, MenuItem } from "../../data/menuItems";
 import {
-  CustomerOrder,
-  getOrders,
-  updateOrderStatus,
-} from "../../utils/orders";
+  FirebaseOrder,
+  listenToOrders,
+  updateFirebaseOrderStatus,
+} from "../../utils/firebaseOrders";
 
 const getInitialMenuItems = (): MenuItem[] => {
   if (typeof window === "undefined") return [];
@@ -28,7 +28,7 @@ const getInitialMenuItems = (): MenuItem[] => {
 
 export default function OwnerDashboard() {
   const [items, setItems] = useState<MenuItem[]>(() => getInitialMenuItems());
-  const [orders, setOrders] = useState<CustomerOrder[]>(() => getOrders());
+  const [orders, setOrders] = useState<FirebaseOrder[]>([]);
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -43,18 +43,18 @@ export default function OwnerDashboard() {
       return;
     }
 
+    const unsubscribe = listenToOrders((firebaseOrders) => {
+      setOrders(firebaseOrders);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const refreshOrders = () => {
-    setOrders(getOrders());
-  };
-
-  const changeOrderStatus = (
+  const changeOrderStatus = async (
     id: string,
-    status: CustomerOrder["status"]
+    status: FirebaseOrder["status"]
   ) => {
-    updateOrderStatus(id, status);
-    refreshOrders();
+    await updateFirebaseOrderStatus(id, status);
   };
 
   const saveMenu = (updated: MenuItem[]) => {
@@ -110,16 +110,31 @@ export default function OwnerDashboard() {
   const pendingOrders = orders.filter((o) => o.status === "Pending");
   const acceptedOrders = orders.filter((o) => o.status === "Accepted");
   const rejectedOrders = orders.filter((o) => o.status === "Rejected");
-  const completedOrders = orders.filter((o) => o.status === "Completed");
+  const preparingOrders = orders.filter((o) => o.status === "Preparing");
+  const servedOrders = orders.filter((o) => o.status === "Served");
 
-  const revenue = completedOrders.reduce((sum, order) => sum + order.total, 0);
+  const revenue = orders
+    .filter((order) => order.paymentStatus === "Paid")
+    .reduce((sum, order) => sum + order.total, 0);
 
-  const OrderCard = ({ order }: { order: CustomerOrder }) => (
+  const today = new Date().toLocaleDateString("en-IN");
+
+  const todaysOrders = orders.filter((order) => {
+    if (!order.createdAt?.toDate) return false;
+
+    return order.createdAt.toDate().toLocaleDateString("en-IN") === today;
+  });
+
+  const todaysRevenue = todaysOrders
+    .filter((order) => order.paymentStatus === "Paid")
+    .reduce((sum, order) => sum + order.total, 0);
+
+  const OrderCard = ({ order }: { order: FirebaseOrder }) => (
     <div className="bg-white text-black rounded-[28px] p-6 shadow-2xl">
       <div className="flex flex-col lg:flex-row lg:justify-between gap-6">
         <div>
           <p className="uppercase text-xs font-black tracking-[0.25em] text-orange-500">
-            {order.type}
+            {order.orderType}
           </p>
 
           <h3 className="text-3xl font-black mt-2">
@@ -130,12 +145,20 @@ export default function OwnerDashboard() {
             Mobile: {order.phone}
           </p>
 
+          <p className="text-lg mt-2 font-bold">
+            Table: {order.tableId}
+          </p>
+
           <p className="text-gray-600 mt-2">
-            Date: {order.date}
+            Date:{" "}
+            {order.createdAt?.toDate
+              ? order.createdAt.toDate().toLocaleString("en-IN")
+              : "Just now"}
           </p>
 
           <div className="mt-5">
             <p className="font-black text-lg">Items</p>
+
             <ul className="list-disc ml-6 mt-2 text-gray-700">
               {order.items.map((item, index) => (
                 <li key={index}>{item}</li>
@@ -144,7 +167,7 @@ export default function OwnerDashboard() {
           </div>
         </div>
 
-        <div className="min-w-[240px]">
+        <div className="min-w-[250px]">
           <div
             className={`px-5 py-3 rounded-full text-center font-black ${
               order.status === "Pending"
@@ -153,6 +176,8 @@ export default function OwnerDashboard() {
                 ? "bg-blue-500 text-white"
                 : order.status === "Rejected"
                 ? "bg-red-500 text-white"
+                : order.status === "Preparing"
+                ? "bg-orange-500 text-black"
                 : "bg-green-500 text-white"
             }`}
           >
@@ -163,17 +188,16 @@ export default function OwnerDashboard() {
             <p>Subtotal: ₹{order.subtotal.toFixed(2)}</p>
             <p>GST: ₹{order.gst.toFixed(2)}</p>
 
-            {order.deliveryCharge !== undefined && (
-              <p>
-                Delivery:{" "}
-                {order.deliveryCharge === 0
-                  ? "FREE"
-                  : `₹${order.deliveryCharge.toFixed(2)}`}
-              </p>
+            {order.packingCharge > 0 && (
+              <p>Container: ₹{order.packingCharge.toFixed(2)}</p>
             )}
 
             <p className="font-black">
               Payment: {order.payment}
+            </p>
+
+            <p className="font-black">
+              Payment Status: {order.paymentStatus}
             </p>
 
             <h2 className="text-4xl font-black text-orange-500">
@@ -182,17 +206,17 @@ export default function OwnerDashboard() {
           </div>
 
           <div className="flex flex-wrap gap-3 mt-6">
-            {order.status === "Pending" && (
+            {order.status === "Pending" && order.id && (
               <>
                 <button
-                  onClick={() => changeOrderStatus(order.id, "Accepted")}
+                  onClick={() => changeOrderStatus(order.id!, "Accepted")}
                   className="bg-green-500 text-white px-5 py-3 rounded-xl font-black"
                 >
                   Accept
                 </button>
 
                 <button
-                  onClick={() => changeOrderStatus(order.id, "Rejected")}
+                  onClick={() => changeOrderStatus(order.id!, "Rejected")}
                   className="bg-red-500 text-white px-5 py-3 rounded-xl font-black"
                 >
                   Reject
@@ -200,12 +224,21 @@ export default function OwnerDashboard() {
               </>
             )}
 
-            {order.status === "Accepted" && (
+            {order.status === "Accepted" && order.id && (
               <button
-                onClick={() => changeOrderStatus(order.id, "Completed")}
+                onClick={() => changeOrderStatus(order.id!, "Preparing")}
+                className="bg-orange-500 text-black px-5 py-3 rounded-xl font-black"
+              >
+                Preparing
+              </button>
+            )}
+
+            {order.status === "Preparing" && order.id && (
+              <button
+                onClick={() => changeOrderStatus(order.id!, "Served")}
                 className="bg-black text-white px-5 py-3 rounded-xl font-black"
               >
-                Complete
+                Served
               </button>
             )}
           </div>
@@ -228,12 +261,21 @@ export default function OwnerDashboard() {
             </h1>
           </div>
 
-          <button
-            onClick={logout}
-            className="bg-orange-500 text-black px-6 sm:px-8 py-4 rounded-2xl font-black"
-          >
-            Sign Out
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <a
+              href="/owner-dashboard/qr"
+              className="bg-white text-black px-6 sm:px-8 py-4 rounded-2xl font-black text-center"
+            >
+              Table QR Codes
+            </a>
+
+            <button
+              onClick={logout}
+              className="bg-orange-500 text-black px-6 sm:px-8 py-4 rounded-2xl font-black"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6 mt-12">
@@ -247,19 +289,33 @@ export default function OwnerDashboard() {
             <p className="font-bold mt-2">Accepted</p>
           </div>
 
-          <div className="bg-red-500 text-white p-6 rounded-[28px]">
-            <h2 className="text-4xl font-black">{rejectedOrders.length}</h2>
-            <p className="font-bold mt-2">Rejected</p>
+          <div className="bg-orange-500 text-black p-6 rounded-[28px]">
+            <h2 className="text-4xl font-black">{preparingOrders.length}</h2>
+            <p className="font-bold mt-2">Preparing</p>
           </div>
 
           <div className="bg-green-500 text-white p-6 rounded-[28px]">
-            <h2 className="text-4xl font-black">{completedOrders.length}</h2>
-            <p className="font-bold mt-2">Completed</p>
+            <h2 className="text-4xl font-black">{servedOrders.length}</h2>
+            <p className="font-bold mt-2">Served</p>
           </div>
 
-          <div className="bg-orange-500 text-black p-6 rounded-[28px]">
+          <div className="bg-white text-black p-6 rounded-[28px]">
             <h2 className="text-4xl font-black">₹{revenue.toFixed(0)}</h2>
-            <p className="font-bold mt-2">Payment History</p>
+            <p className="font-bold mt-2">Total Payments</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          <div className="bg-orange-500 text-black p-6 rounded-[28px]">
+            <h2 className="text-4xl font-black">{todaysOrders.length}</h2>
+            <p className="font-bold mt-2">Today Orders</p>
+          </div>
+
+          <div className="bg-white text-black p-6 rounded-[28px]">
+            <h2 className="text-4xl font-black">
+              ₹{todaysRevenue.toFixed(0)}
+            </h2>
+            <p className="font-bold mt-2">Today Payments</p>
           </div>
         </div>
 
@@ -296,6 +352,22 @@ export default function OwnerDashboard() {
         </section>
 
         <section className="mt-16">
+          <h2 className="text-4xl font-black">Preparing Orders</h2>
+
+          <div className="space-y-6 mt-8">
+            {preparingOrders.length === 0 ? (
+              <p className="bg-white text-black p-8 rounded-[28px] text-xl font-bold">
+                No preparing orders
+              </p>
+            ) : (
+              preparingOrders.map((order) => (
+                <OrderCard key={order.id} order={order} />
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="mt-16">
           <h2 className="text-4xl font-black">Rejected Orders</h2>
 
           <div className="space-y-6 mt-8">
@@ -312,15 +384,15 @@ export default function OwnerDashboard() {
         </section>
 
         <section className="mt-16">
-          <h2 className="text-4xl font-black">Completed / Payment History</h2>
+          <h2 className="text-4xl font-black">Served / Payment History</h2>
 
           <div className="space-y-6 mt-8">
-            {completedOrders.length === 0 ? (
+            {servedOrders.length === 0 ? (
               <p className="bg-white text-black p-8 rounded-[28px] text-xl font-bold">
-                No completed payments
+                No served payments
               </p>
             ) : (
-              completedOrders.map((order) => (
+              servedOrders.map((order) => (
                 <OrderCard key={order.id} order={order} />
               ))
             )}
@@ -395,7 +467,6 @@ export default function OwnerDashboard() {
                 key={item.id}
                 className="bg-white text-black rounded-[30px] overflow-hidden shadow-2xl"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element -- Owner-added menu images may come from arbitrary URLs outside the optimized image allowlist. */}
                 <img
                   src={item.image}
                   alt={item.name}
