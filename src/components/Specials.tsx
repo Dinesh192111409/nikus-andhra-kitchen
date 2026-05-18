@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getActiveMenuItems } from "../utils/menu";
 import type { MenuItem } from "../data/menuItems";
+import { saveOrder } from "../utils/orders";
 
 export default function Specials() {
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -31,10 +32,17 @@ export default function Specials() {
   };
 
   const removeItem = (name: string) => {
-    setCart((prev) => ({
-      ...prev,
-      [name]: prev[name] > 1 ? prev[name] - 1 : 0,
-    }));
+    setCart((prev) => {
+      const updated = { ...prev };
+
+      if (updated[name] > 1) {
+        updated[name] -= 1;
+      } else {
+        delete updated[name];
+      }
+
+      return updated;
+    });
   };
 
   const subtotal = items.reduce((total, item) => {
@@ -42,9 +50,60 @@ export default function Specials() {
   }, 0);
 
   const gst = subtotal * 0.05;
+
   const total = subtotal + gst;
 
-  const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+  const totalItems = Object.values(cart).reduce(
+    (a, b) => a + b,
+    0
+  );
+
+  const handleCheckout = () => {
+    if (totalItems === 0) {
+      alert("Cart is empty");
+      return;
+    }
+
+    const order = {
+      id: Date.now().toString(),
+
+      type: "specials" as const,
+
+      customer: "Walk-in Customer",
+
+      phone: "Not Provided",
+
+      items: Object.entries(cart)
+        .filter(([_, qty]) => qty > 0)
+        .map(([name, qty]) => `${name} x ${qty}`),
+
+      subtotal,
+
+      gst,
+
+      total,
+
+      payment: "UPI",
+
+      status: "Pending" as const,
+
+      date: new Date().toLocaleString("en-IN"),
+    };
+
+    saveOrder(order);
+
+    const upiLink = `upi://pay?pa=nikusandhrakitchen@upi&pn=Nikus Andhra Kitchen&am=${total.toFixed(
+      2
+    )}&cu=INR`;
+
+    window.location.href = upiLink;
+
+    setTimeout(() => {
+      setCart({});
+
+      alert("Order sent successfully!");
+    }, 3000);
+  };
 
   return (
     <section
@@ -89,7 +148,8 @@ export default function Specials() {
             </h2>
 
             <p className="text-gray-300 mt-4 text-base sm:text-xl">
-              Click Biryani, Starters, Veg, Desserts or All to view items.
+              Click Biryani, Starters, Veg, Desserts or All to
+              view items.
             </p>
           </div>
         )}
@@ -119,7 +179,8 @@ export default function Specials() {
                   </h2>
 
                   <p className="text-gray-700 mt-4 leading-7 text-sm md:text-base">
-                    Freshly prepared Nikus Andhra Kitchen special.
+                    Freshly prepared Nikus Andhra Kitchen
+                    special.
                   </p>
 
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 mt-8">
@@ -143,7 +204,9 @@ export default function Specials() {
                     ) : (
                       <div className="flex items-center justify-center gap-6 bg-black text-white px-6 py-4 rounded-full w-full sm:w-auto">
                         <button
-                          onClick={() => removeItem(dish.name)}
+                          onClick={() =>
+                            removeItem(dish.name)
+                          }
                           className="text-3xl"
                         >
                           -
@@ -154,7 +217,9 @@ export default function Specials() {
                         </span>
 
                         <button
-                          onClick={() => addItem(dish.name)}
+                          onClick={() =>
+                            addItem(dish.name)
+                          }
                           className="text-3xl"
                         >
                           +
@@ -174,7 +239,10 @@ export default function Specials() {
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
             <div>
               <p className="text-base md:text-xl">
-                Items: <span className="font-bold">{totalItems}</span>
+                Items:
+                <span className="font-bold ml-2">
+                  {totalItems}
+                </span>
               </p>
 
               <p className="text-sm md:text-lg mt-1 md:mt-2">
@@ -190,7 +258,10 @@ export default function Specials() {
               </h2>
             </div>
 
-            <button className="bg-orange-500 hover:bg-orange-400 transition duration-300 text-black font-black px-8 md:px-14 py-4 md:py-5 rounded-full text-base md:text-xl uppercase tracking-widest">
+            <button
+              onClick={handleCheckout}
+              className="bg-orange-500 hover:bg-orange-400 transition duration-300 text-black font-black px-8 md:px-14 py-4 md:py-5 rounded-full text-base md:text-xl uppercase tracking-widest"
+            >
               Proceed To Checkout
             </button>
           </div>

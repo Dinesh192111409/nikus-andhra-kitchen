@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getActiveMenuItems } from "../utils/menu";
 import type { MenuItem } from "../data/menuItems";
+import { saveOrder } from "../utils/orders";
 
 const areas = [
   { name: "Select Your Area", km: 0 },
@@ -17,7 +18,15 @@ const areas = [
 
 export default function Delivery() {
   const [items, setItems] = useState<MenuItem[]>([]);
+  const [orderType, setOrderType] = useState<"Delivery" | "Pickup">("Delivery");
+
+  const [customerName, setCustomerName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [locationLink, setLocationLink] = useState("");
+
   const [selectedArea, setSelectedArea] = useState(areas[0]);
+  const [containerCharge, setContainerCharge] = useState("0");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [paymentDone, setPaymentDone] = useState(false);
   const [cart, setCart] = useState<{ [key: string]: number }>({});
@@ -42,6 +51,24 @@ export default function Delivery() {
     setPaymentDone(false);
   };
 
+  const shareLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Location sharing is not supported in this browser");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const link = `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+        setLocationLink(link);
+        alert("Location added successfully");
+      },
+      () => {
+        alert("Location permission denied");
+      }
+    );
+  };
+
   const itemsTotal = items.reduce((total, item) => {
     return total + item.price * (cart[item.name] || 0);
   }, 0);
@@ -49,16 +76,49 @@ export default function Delivery() {
   const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
 
   const deliveryCharge =
-    selectedArea.km === 0
+    orderType === "Pickup"
+      ? 0
+      : selectedArea.km === 0
       ? 0
       : selectedArea.km <= 5
       ? 0
       : (selectedArea.km - 5) * 15;
 
+  const packingCharge = Number(containerCharge) || 0;
   const gst = itemsTotal * 0.05;
-  const grandTotal = itemsTotal + gst + deliveryCharge;
+  const grandTotal = itemsTotal + gst + deliveryCharge + packingCharge;
 
-  const canShowBill = selectedArea.km > 0 && itemsTotal > 0;
+  const canShowBill =
+    totalItems > 0 &&
+    customerName.trim() !== "" &&
+    phone.trim() !== "" &&
+    (orderType === "Pickup" ||
+      (selectedArea.km > 0 && address.trim() !== ""));
+
+  const saveDeliveryOrder = (payment: string) => {
+    saveOrder({
+      id: Date.now().toString(),
+      type: "delivery",
+      customer: customerName,
+      phone,
+      items: [
+        `Order Type: ${orderType}`,
+        ...items
+          .filter((item) => cart[item.name] > 0)
+          .map((item) => `${item.name} x ${cart[item.name]}`),
+        orderType === "Delivery" ? `Address: ${address}` : "Pickup from restaurant",
+        locationLink ? `Location: ${locationLink}` : "Location: Not shared",
+        `Container Charge: ₹${packingCharge.toFixed(2)}`,
+      ],
+      subtotal: itemsTotal,
+      gst,
+      deliveryCharge,
+      total: grandTotal,
+      payment,
+      status: "Pending",
+      date: new Date().toLocaleString(),
+    });
+  };
 
   return (
     <section
@@ -68,7 +128,7 @@ export default function Delivery() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-14 md:mb-20">
           <p className="uppercase tracking-[0.25em] sm:tracking-[0.4em] text-orange-400 text-xs sm:text-sm font-black">
-            Delivery Checkout
+            Delivery & Pickup
           </p>
 
           <h2 className="text-4xl sm:text-5xl md:text-7xl font-black mt-6 leading-tight">
@@ -78,8 +138,8 @@ export default function Delivery() {
           </h2>
 
           <p className="text-gray-400 text-base sm:text-lg md:text-xl mt-8 max-w-3xl mx-auto leading-8 md:leading-9">
-            Select items, choose customer area, and the app automatically
-            calculates GST, delivery charge and payment amount.
+            Customer can choose delivery or pickup, add address, share location,
+            select food and complete payment.
           </p>
         </div>
 
@@ -140,45 +200,124 @@ export default function Delivery() {
 
           <div className="bg-orange-500 text-black rounded-[28px] md:rounded-[40px] p-5 sm:p-7 md:p-10 shadow-2xl">
             <h3 className="text-4xl md:text-5xl font-black">
-              Delivery Order
+              Order Details
             </h3>
 
-            <label className="block mt-8 md:mt-10 text-lg md:text-xl font-black">
-              Select Customer Area
-            </label>
-
-            <select
-              value={selectedArea.name}
-              onChange={(e) => {
-                const area = areas.find((a) => a.name === e.target.value);
-
-                if (area) {
-                  setSelectedArea(area);
-                  setPaymentMethod("");
+            <div className="grid grid-cols-2 gap-4 mt-8">
+              <button
+                onClick={() => {
+                  setOrderType("Delivery");
                   setPaymentDone(false);
-                }
-              }}
-              className="w-full mt-4 p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold outline-none"
-            >
-              {areas.map((area) => (
-                <option key={area.name} value={area.name}>
-                  {area.name}
-                </option>
-              ))}
-            </select>
+                }}
+                className={`p-5 rounded-2xl font-black ${
+                  orderType === "Delivery"
+                    ? "bg-black text-white"
+                    : "bg-white text-black"
+                }`}
+              >
+                Delivery
+              </button>
 
-            {totalItems === 0 && (
+              <button
+                onClick={() => {
+                  setOrderType("Pickup");
+                  setPaymentDone(false);
+                }}
+                className={`p-5 rounded-2xl font-black ${
+                  orderType === "Pickup"
+                    ? "bg-black text-white"
+                    : "bg-white text-black"
+                }`}
+              >
+                Pickup
+              </button>
+            </div>
+
+            <div className="mt-8 space-y-5">
+              <input
+                type="text"
+                placeholder="Customer Name"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                className="w-full p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold outline-none"
+              />
+
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold outline-none"
+              />
+
+              {orderType === "Delivery" && (
+                <>
+                  <textarea
+                    placeholder="Full Delivery Address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold outline-none min-h-[120px]"
+                  />
+
+                  <button
+                    onClick={shareLocation}
+                    className="w-full bg-white text-black py-4 rounded-2xl font-black"
+                  >
+                    Share Current Location
+                  </button>
+
+                  {locationLink && (
+                    <a
+                      href={locationLink}
+                      target="_blank"
+                      className="block bg-black text-white p-4 rounded-2xl text-center font-black"
+                    >
+                      View Shared Location
+                    </a>
+                  )}
+
+                  <label className="block text-lg md:text-xl font-black">
+                    Select Customer Area
+                  </label>
+
+                  <select
+                    value={selectedArea.name}
+                    onChange={(e) => {
+                      const area = areas.find(
+                        (a) => a.name === e.target.value
+                      );
+
+                      if (area) {
+                        setSelectedArea(area);
+                        setPaymentMethod("");
+                        setPaymentDone(false);
+                      }
+                    }}
+                    className="w-full p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold outline-none"
+                  >
+                    {areas.map((area) => (
+                      <option key={area.name} value={area.name}>
+                        {area.name}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
+
+              <input
+                type="number"
+                placeholder="Container / Packing Charge"
+                value={containerCharge}
+                onChange={(e) => setContainerCharge(e.target.value)}
+                className="w-full p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold outline-none"
+              />
+            </div>
+
+            {!canShowBill && (
               <div className="bg-black text-white rounded-[28px] md:rounded-[35px] p-6 md:p-8 mt-10">
                 <p className="text-lg md:text-xl">
-                  Add food items to calculate the bill.
-                </p>
-              </div>
-            )}
-
-            {totalItems > 0 && selectedArea.km === 0 && (
-              <div className="bg-black text-white rounded-[28px] md:rounded-[35px] p-6 md:p-8 mt-10">
-                <p className="text-lg md:text-xl">
-                  Select delivery area to calculate delivery charge.
+                  Add items, customer name, phone and required details to
+                  continue.
                 </p>
               </div>
             )}
@@ -208,14 +347,25 @@ export default function Delivery() {
 
                   <div className="border-t border-white/20 pt-5 space-y-4">
                     <div className="flex justify-between gap-4 text-lg md:text-xl">
-                      <span>Area</span>
-                      <span className="text-right">{selectedArea.name}</span>
+                      <span>Type</span>
+                      <span>{orderType}</span>
                     </div>
 
-                    <div className="flex justify-between gap-4 text-lg md:text-xl">
-                      <span>Distance</span>
-                      <span>{selectedArea.km} KM</span>
-                    </div>
+                    {orderType === "Delivery" && (
+                      <>
+                        <div className="flex justify-between gap-4 text-lg md:text-xl">
+                          <span>Area</span>
+                          <span className="text-right">
+                            {selectedArea.name}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between gap-4 text-lg md:text-xl">
+                          <span>Distance</span>
+                          <span>{selectedArea.km} KM</span>
+                        </div>
+                      </>
+                    )}
 
                     <div className="flex justify-between gap-4 text-lg md:text-xl">
                       <span>Items Total</span>
@@ -225,6 +375,11 @@ export default function Delivery() {
                     <div className="flex justify-between gap-4 text-lg md:text-xl">
                       <span>GST 5%</span>
                       <span>₹{gst.toFixed(2)}</span>
+                    </div>
+
+                    <div className="flex justify-between gap-4 text-lg md:text-xl">
+                      <span>Container Charge</span>
+                      <span>₹{packingCharge.toFixed(2)}</span>
                     </div>
 
                     <div className="flex justify-between gap-4 text-lg md:text-xl">
@@ -298,7 +453,10 @@ export default function Delivery() {
                     </p>
 
                     <button
-                      onClick={() => setPaymentDone(true)}
+                      onClick={() => {
+                        saveDeliveryOrder("Online UPI");
+                        setPaymentDone(true);
+                      }}
                       className="w-full mt-8 bg-green-500 text-black py-5 rounded-2xl text-lg md:text-xl font-black"
                     >
                       Payment Completed
@@ -306,7 +464,7 @@ export default function Delivery() {
 
                     {paymentDone && (
                       <p className="text-green-700 text-xl md:text-2xl font-black mt-5">
-                        Payment Successful ✓
+                        Payment Successful ✓ Order sent to owner dashboard.
                       </p>
                     )}
                   </div>
@@ -319,12 +477,15 @@ export default function Delivery() {
                     </h3>
 
                     <p className="text-lg md:text-xl mt-5 leading-8 md:leading-9">
-                      Customer will pay ₹{grandTotal.toFixed(2)} during
-                      delivery.
+                      Customer will pay ₹{grandTotal.toFixed(2)} during{" "}
+                      {orderType.toLowerCase()}.
                     </p>
 
                     <button
-                      onClick={() => setPaymentDone(true)}
+                      onClick={() => {
+                        saveDeliveryOrder("Pay On Delivery");
+                        setPaymentDone(true);
+                      }}
                       className="w-full mt-8 bg-black text-white py-5 rounded-2xl text-lg md:text-xl font-black"
                     >
                       Confirm Order
@@ -332,7 +493,7 @@ export default function Delivery() {
 
                     {paymentDone && (
                       <p className="text-green-700 text-xl md:text-2xl font-black mt-5">
-                        Order Confirmed ✓
+                        Order Confirmed ✓ Sent to owner dashboard.
                       </p>
                     )}
                   </div>
