@@ -10,7 +10,7 @@ const createOrderId = () => crypto.randomUUID();
 export default function Specials() {
   const [items] = useState<MenuItem[]>(() => getActiveMenuItems());
   const [cart, setCart] = useState<{ [key: string]: number }>({});
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [search, setSearch] = useState("");
   const [showCheckout, setShowCheckout] = useState(false);
   const [customer, setCustomer] = useState("");
@@ -22,16 +22,20 @@ export default function Specials() {
     ...Array.from(new Set(items.map((item) => item.category))),
   ];
 
-  const filteredDishes = items.filter((item) => {
-    const matchesCategory =
-      selectedCategory === "All" || item.category === selectedCategory;
+  const filteredDishes =
+    selectedCategory === ""
+      ? []
+      : items.filter((item) => {
+          const matchesCategory =
+            selectedCategory === "All" ||
+            item.category === selectedCategory;
 
-    const matchesSearch = item.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
+          const matchesSearch = item.name
+            .toLowerCase()
+            .includes(search.toLowerCase());
 
-    return matchesCategory && matchesSearch;
-  });
+          return matchesCategory && matchesSearch;
+        });
 
   const addItem = (name: string) => {
     setCart((prev) => ({
@@ -167,7 +171,19 @@ export default function Specials() {
           ))}
         </div>
 
-        {filteredDishes.length === 0 && (
+        {selectedCategory === "" && (
+          <div className="bg-black/70 p-10 rounded-[30px] text-center shadow-2xl border border-orange-400/20 mb-8">
+            <h2 className="text-3xl font-black text-orange-300">
+              Select Category
+            </h2>
+
+            <p className="mt-3 text-orange-100 font-semibold">
+              Choose Biryani, Starters, Curries and more.
+            </p>
+          </div>
+        )}
+
+        {selectedCategory !== "" && filteredDishes.length === 0 && (
           <div className="bg-black/70 p-10 rounded-[30px] text-center shadow-2xl border border-orange-400/20">
             <h2 className="text-3xl font-black text-orange-300">
               No items found
