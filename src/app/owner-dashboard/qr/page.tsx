@@ -1,7 +1,7 @@
 const tables = [1, 2, 3, 4, 5, 6, 7];
 
 export default function QRPage() {
- const websiteUrl = "http://192.168.1.7:3000";
+ const websiteUrl = "https://nikus-andhra-kitchen.vercel.app";
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#ff7b00] via-[#ff8c1a] to-black text-white p-6 md:p-10">
