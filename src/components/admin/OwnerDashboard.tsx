@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../../lib/firebase";
 import { menuItems, MenuItem } from "../../data/menuItems";
 import {
   FirebaseOrder,
@@ -27,7 +29,8 @@ const getInitialMenuItems = (): MenuItem[] => {
 };
 
 export default function OwnerDashboard() {
-  const [items, setItems] = useState<MenuItem[]>(() => getInitialMenuItems());
+  const [mounted, setMounted] = useState(false);
+  const [items, setItems] = useState<MenuItem[]>([]);
   const [orders, setOrders] = useState<FirebaseOrder[]>([]);
 
   const [name, setName] = useState("");
@@ -36,18 +39,24 @@ export default function OwnerDashboard() {
   const [image, setImage] = useState("");
 
   useEffect(() => {
-    const ownerLogin = localStorage.getItem("nikus_owner");
+    setMounted(true);
 
-    if (!ownerLogin) {
-      window.location.href = "/";
-      return;
-    }
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "/owner-login";
+        return;
+      }
 
-    const unsubscribe = listenToOrders((firebaseOrders) => {
-      setOrders(firebaseOrders);
+      setItems(getInitialMenuItems());
+
+      const unsubscribeOrders = listenToOrders((firebaseOrders) => {
+        setOrders(firebaseOrders);
+      });
+
+      return () => unsubscribeOrders();
     });
 
-    return () => unsubscribe();
+    return () => unsubscribeAuth();
   }, []);
 
   const changeOrderStatus = async (
@@ -102,10 +111,18 @@ export default function OwnerDashboard() {
     setImage("");
   };
 
-  const logout = () => {
-    localStorage.removeItem("nikus_owner");
-    window.location.href = "/";
+  const logout = async () => {
+    await signOut(auth);
+    window.location.href = "/owner-login";
   };
+
+  if (!mounted) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        <h1 className="text-3xl font-black text-orange-400">Loading...</h1>
+      </main>
+    );
+  }
 
   const pendingOrders = orders.filter((o) => o.status === "Pending");
   const acceptedOrders = orders.filter((o) => o.status === "Accepted");
@@ -121,7 +138,6 @@ export default function OwnerDashboard() {
 
   const todaysOrders = orders.filter((order) => {
     if (!order.createdAt?.toDate) return false;
-
     return order.createdAt.toDate().toLocaleDateString("en-IN") === today;
   });
 
@@ -137,17 +153,11 @@ export default function OwnerDashboard() {
             {order.orderType}
           </p>
 
-          <h3 className="text-3xl font-black mt-2">
-            {order.customer}
-          </h3>
+          <h3 className="text-3xl font-black mt-2">{order.customer}</h3>
 
-          <p className="text-lg mt-2 font-bold">
-            Mobile: {order.phone}
-          </p>
+          <p className="text-lg mt-2 font-bold">Mobile: {order.phone}</p>
 
-          <p className="text-lg mt-2 font-bold">
-            Table: {order.tableId}
-          </p>
+          <p className="text-lg mt-2 font-bold">Table: {order.tableId}</p>
 
           <p className="text-gray-600 mt-2">
             Date:{" "}
@@ -192,13 +202,9 @@ export default function OwnerDashboard() {
               <p>Container: ₹{order.packingCharge.toFixed(2)}</p>
             )}
 
-            <p className="font-black">
-              Payment: {order.payment}
-            </p>
+            <p className="font-black">Payment: {order.payment}</p>
 
-            <p className="font-black">
-              Payment Status: {order.paymentStatus}
-            </p>
+            <p className="font-black">Payment Status: {order.paymentStatus}</p>
 
             <h2 className="text-4xl font-black text-orange-500">
               ₹{order.total.toFixed(2)}
@@ -319,85 +325,29 @@ export default function OwnerDashboard() {
           </div>
         </div>
 
-        <section className="mt-16">
-          <h2 className="text-4xl font-black">Pending Orders</h2>
+        {[
+          ["Pending Orders", pendingOrders],
+          ["Accepted Orders", acceptedOrders],
+          ["Preparing Orders", preparingOrders],
+          ["Rejected Orders", rejectedOrders],
+          ["Served / Payment History", servedOrders],
+        ].map(([title, list]) => (
+          <section key={title as string} className="mt-16">
+            <h2 className="text-4xl font-black">{title as string}</h2>
 
-          <div className="space-y-6 mt-8">
-            {pendingOrders.length === 0 ? (
-              <p className="bg-white text-black p-8 rounded-[28px] text-xl font-bold">
-                No pending orders
-              </p>
-            ) : (
-              pendingOrders.map((order) => (
-                <OrderCard key={order.id} order={order} />
-              ))
-            )}
-          </div>
-        </section>
-
-        <section className="mt-16">
-          <h2 className="text-4xl font-black">Accepted Orders</h2>
-
-          <div className="space-y-6 mt-8">
-            {acceptedOrders.length === 0 ? (
-              <p className="bg-white text-black p-8 rounded-[28px] text-xl font-bold">
-                No accepted orders
-              </p>
-            ) : (
-              acceptedOrders.map((order) => (
-                <OrderCard key={order.id} order={order} />
-              ))
-            )}
-          </div>
-        </section>
-
-        <section className="mt-16">
-          <h2 className="text-4xl font-black">Preparing Orders</h2>
-
-          <div className="space-y-6 mt-8">
-            {preparingOrders.length === 0 ? (
-              <p className="bg-white text-black p-8 rounded-[28px] text-xl font-bold">
-                No preparing orders
-              </p>
-            ) : (
-              preparingOrders.map((order) => (
-                <OrderCard key={order.id} order={order} />
-              ))
-            )}
-          </div>
-        </section>
-
-        <section className="mt-16">
-          <h2 className="text-4xl font-black">Rejected Orders</h2>
-
-          <div className="space-y-6 mt-8">
-            {rejectedOrders.length === 0 ? (
-              <p className="bg-white text-black p-8 rounded-[28px] text-xl font-bold">
-                No rejected orders
-              </p>
-            ) : (
-              rejectedOrders.map((order) => (
-                <OrderCard key={order.id} order={order} />
-              ))
-            )}
-          </div>
-        </section>
-
-        <section className="mt-16">
-          <h2 className="text-4xl font-black">Served / Payment History</h2>
-
-          <div className="space-y-6 mt-8">
-            {servedOrders.length === 0 ? (
-              <p className="bg-white text-black p-8 rounded-[28px] text-xl font-bold">
-                No served payments
-              </p>
-            ) : (
-              servedOrders.map((order) => (
-                <OrderCard key={order.id} order={order} />
-              ))
-            )}
-          </div>
-        </section>
+            <div className="space-y-6 mt-8">
+              {(list as FirebaseOrder[]).length === 0 ? (
+                <p className="bg-white text-black p-8 rounded-[28px] text-xl font-bold">
+                  No {(title as string).toLowerCase()}
+                </p>
+              ) : (
+                (list as FirebaseOrder[]).map((order) => (
+                  <OrderCard key={order.id} order={order} />
+                ))
+              )}
+            </div>
+          </section>
+        ))}
 
         <div className="bg-orange-500 text-black rounded-[35px] p-5 sm:p-7 md:p-10 mt-20">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black">
@@ -478,9 +428,7 @@ export default function OwnerDashboard() {
                     {item.name}
                   </h3>
 
-                  <p className="text-lg font-bold mt-3">
-                    ₹{item.price}
-                  </p>
+                  <p className="text-lg font-bold mt-3">₹{item.price}</p>
 
                   <p className="text-gray-600 font-bold mt-2">
                     {item.category}

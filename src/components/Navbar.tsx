@@ -61,7 +61,7 @@ export default function Navbar() {
           </a>
 
           <a
-            href="/owner-dashboard"
+            href="/owner-login"
             className="bg-black border border-orange-400 text-white px-5 py-3 rounded-full font-black hover:bg-orange-500 hover:text-black transition duration-300 hover:scale-105"
           >
             OWNER
@@ -108,11 +108,11 @@ export default function Navbar() {
             </a>
 
             <a
-              href="/owner-dashboard"
+              href="/owner-login"
               onClick={() => setOpen(false)}
               className="bg-black border border-orange-400 text-white px-6 py-4 rounded-full text-center font-black"
             >
-              OWNER DASHBOARD
+              OWNER LOGIN
             </a>
           </nav>
         </div>

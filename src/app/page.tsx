@@ -11,19 +11,12 @@ export default function Home() {
   return (
     <main className="bg-gradient-to-br from-[#ff7b00] via-[#ff8c1a] to-black min-h-screen overflow-hidden">
       <Navbar />
-
       <Hero />
-
       <Specials />
-
       <About />
-
       <Reservation />
-
       <Delivery />
-
       <Gallery />
-
       <Footer />
     </main>
   );
