@@ -1,0 +1,13 @@
+
+> nikus-andhra-kitchen@0.1.0 dev
+> next dev --port 3000
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.4:3000
+✓ Ready in 1746ms
+
+○ Compiling / ...
+✓ Finished writing to filesystem cache in 26.6s
+✓ Finished writing to filesystem cache in 12.1s
+✓ Finished writing to filesystem cache in 24.7s

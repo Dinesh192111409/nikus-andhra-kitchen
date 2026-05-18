@@ -1,62 +1,99 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const navLinks = [
-  { name: "HOME", href: "#home" },
-  { name: "ABOUT", href: "#about" },
   { name: "MENU", href: "#menu" },
-  { name: "GALLERY", href: "#gallery" },
-  { name: "RESERVATIONS", href: "#reservation" },
-  { name: "CONTACT", href: "#contact" },
+  { name: "OFFERS", href: "#menu" },
+  { name: "BOOK TABLE", href: "#reservation" },
+  { name: "TRACK ORDER", href: "#delivery" },
 ];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setIsCustomerLoggedIn(!!localStorage.getItem("nikus_customer"));
+  }, []);
+
+  const customerLogout = () => {
+    localStorage.removeItem("nikus_customer");
+    setIsCustomerLoggedIn(false);
+    window.location.href = "/";
+  };
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-[#e85d04]/90 backdrop-blur-xl border-b border-white/10 shadow-2xl">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 md:px-8 py-3 md:py-4">
-        <a href="#home" className="flex items-center gap-3 md:gap-4">
+    <header className="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-black via-[#1a1a1a] to-[#e85d04] shadow-2xl border-b border-orange-500/20 backdrop-blur-xl">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 md:px-8 py-3">
+        <a href="#home" className="flex items-center gap-3">
           <img
             src="/logo.png"
             alt="Nikus Andhra Kitchen"
-            className="w-12 h-12 sm:w-14 sm:h-14 md:w-20 md:h-20 object-contain"
+            className="w-12 h-12 md:w-16 md:h-16 object-contain"
           />
 
           <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-none">
+            <h1 className="text-xl md:text-3xl font-black text-white leading-none">
               NIKUS
             </h1>
 
-            <p className="text-[8px] sm:text-[10px] md:text-sm tracking-[0.2em] sm:tracking-[0.3em] md:tracking-[0.35em] text-white uppercase">
+            <p className="text-[9px] md:text-xs tracking-[0.25em] text-orange-400 font-black uppercase">
               Andhra Kitchen
             </p>
           </div>
         </a>
 
-        <nav className="hidden xl:flex items-center gap-8 text-white font-bold text-sm tracking-[0.15em] uppercase">
+        <nav className="hidden xl:flex items-center gap-8 font-black text-sm tracking-widest uppercase text-white">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
-              className="hover:text-black transition duration-300"
+              className="hover:text-orange-400 transition duration-300"
             >
               {link.name}
             </a>
           ))}
         </nav>
 
-        <a
-          href="#reservation"
-          className="hidden lg:flex bg-black text-white px-6 py-3 md:px-7 md:py-4 rounded-2xl font-black hover:bg-white hover:text-black transition duration-300 hover:scale-105"
-        >
-          BOOK A TABLE
-        </a>
+        <div className="hidden lg:flex items-center gap-3">
+          <a
+            href="#menu"
+            className="bg-orange-500 hover:bg-orange-400 text-black px-6 py-3 rounded-full font-black transition duration-300 hover:scale-105"
+          >
+            ORDER NOW
+          </a>
+
+          <a
+            href="#menu"
+            className="bg-white hover:bg-gray-200 text-black px-5 py-3 rounded-full font-black transition duration-300 hover:scale-105"
+          >
+            CART
+          </a>
+
+          {mounted &&
+            (isCustomerLoggedIn ? (
+              <button
+                onClick={customerLogout}
+                className="bg-black border border-orange-400 text-white px-5 py-3 rounded-full font-black hover:bg-orange-500 hover:text-black transition duration-300 hover:scale-105"
+              >
+                SIGN OUT
+              </button>
+            ) : (
+              <a
+                href="/"
+                className="bg-black border border-orange-400 text-white px-5 py-3 rounded-full font-black hover:bg-orange-500 hover:text-black transition duration-300 hover:scale-105"
+              >
+                LOGIN
+              </a>
+            ))}
+        </div>
 
         <button
           onClick={() => setOpen(!open)}
-          className="xl:hidden text-white text-3xl sm:text-4xl font-black"
+          className="xl:hidden text-white text-4xl font-black"
           aria-label="Toggle menu"
         >
           {open ? "×" : "☰"}
@@ -64,26 +101,52 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <div className="xl:hidden bg-black/95 backdrop-blur-xl px-5 sm:px-6 py-6 sm:py-8 border-t border-white/10">
-          <nav className="flex flex-col gap-5 sm:gap-6 text-white text-lg sm:text-xl font-bold uppercase tracking-widest">
+        <div className="xl:hidden bg-gradient-to-b from-black to-[#e85d04] px-6 py-6 border-t border-orange-500/20 shadow-2xl">
+          <nav className="flex flex-col gap-5 text-white text-lg font-black uppercase tracking-widest">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="hover:text-orange-400 transition"
+                className="hover:text-orange-300 transition"
               >
                 {link.name}
               </a>
             ))}
 
             <a
-              href="#reservation"
+              href="#menu"
               onClick={() => setOpen(false)}
-              className="bg-orange-500 text-black px-6 py-4 rounded-2xl text-center font-black mt-4"
+              className="bg-orange-500 text-black px-6 py-4 rounded-full text-center font-black"
             >
-              BOOK A TABLE
+              ORDER NOW
             </a>
+
+            <a
+              href="#menu"
+              onClick={() => setOpen(false)}
+              className="bg-white text-black px-6 py-4 rounded-full text-center font-black"
+            >
+              CART
+            </a>
+
+            {mounted &&
+              (isCustomerLoggedIn ? (
+                <button
+                  onClick={customerLogout}
+                  className="bg-black border border-orange-400 text-white px-6 py-4 rounded-full text-center font-black"
+                >
+                  SIGN OUT
+                </button>
+              ) : (
+                <a
+                  href="/"
+                  onClick={() => setOpen(false)}
+                  className="bg-black border border-orange-400 text-white px-6 py-4 rounded-full text-center font-black"
+                >
+                  LOGIN
+                </a>
+              ))}
           </nav>
         </div>
       )}

@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function Footer() {
   return (
     <footer className="bg-black text-white border-t border-orange-500/20 overflow-hidden">
@@ -12,9 +14,11 @@ export default function Footer() {
 
             <div className="flex items-center gap-4">
 
-              <img
+              <Image
                 src="/logo.png"
                 alt="Nikus Andhra Kitchen"
+                width={80}
+                height={80}
                 className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
               />
 

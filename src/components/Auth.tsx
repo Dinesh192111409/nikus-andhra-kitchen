@@ -11,6 +11,13 @@ type Mode =
   | "signup"
   | "forgot";
 
+type AuthUser = {
+  name: string;
+  phone: string;
+  password: string;
+  role: AuthProps["role"];
+};
+
 export default function Auth({
   role,
 }: AuthProps) {
@@ -39,13 +46,13 @@ export default function Auth({
       ? "nikus_owner"
       : "nikus_customer";
 
-  const getUsers = () => {
+  const getUsers = (): AuthUser[] => {
 
     const users =
       localStorage.getItem(storageKey);
 
     return users
-      ? JSON.parse(users)
+      ? (JSON.parse(users) as AuthUser[])
       : [];
 
   };
@@ -69,7 +76,7 @@ export default function Auth({
     const users = getUsers();
 
     const exists = users.find(
-      (user: any) =>
+      (user) =>
         user.phone === phone
     );
 
@@ -127,7 +134,7 @@ export default function Auth({
     const users = getUsers();
 
     const validUser = users.find(
-      (user: any) =>
+      (user) =>
         user.phone === phone &&
         user.password === password
     );
@@ -185,7 +192,7 @@ export default function Auth({
     const users = getUsers();
 
     const exists = users.find(
-      (user: any) =>
+      (user) =>
         user.phone === phone
     );
 
@@ -200,7 +207,7 @@ export default function Auth({
     }
 
     const updatedUsers =
-      users.map((user: any) =>
+      users.map((user) =>
         user.phone === phone
           ? {
               ...user,

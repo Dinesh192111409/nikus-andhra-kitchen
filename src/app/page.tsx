@@ -7,6 +7,13 @@ type Mode = "signin" | "signup" | "forgot";
 
 const OWNER_ALLOWED_MOBILE = "9676373970";
 
+type PortalUser = {
+  name: string;
+  mobile: string;
+  password: string;
+  role: Role;
+};
+
 export default function LoginPortal() {
   const [role, setRole] = useState<Role>("customer");
   const [mode, setMode] = useState<Mode>("signin");
@@ -30,9 +37,9 @@ export default function LoginPortal() {
       ? "nikus_owner"
       : "nikus_customer";
 
-  const getUsers = () => {
+  const getUsers = (): PortalUser[] => {
     const users = localStorage.getItem(usersKey);
-    return users ? JSON.parse(users) : [];
+    return users ? (JSON.parse(users) as PortalUser[]) : [];
   };
 
   const sendOtp = () => {
@@ -95,7 +102,7 @@ export default function LoginPortal() {
       return;
     }
 
-    const exists = users.find((user: any) => user.mobile === mobile);
+    const exists = users.find((user) => user.mobile === mobile);
 
     if (exists) {
       alert("Account already exists. Please sign in.");
@@ -140,8 +147,7 @@ export default function LoginPortal() {
     const users = getUsers();
 
     const validUser = users.find(
-      (user: any) =>
-        user.mobile === mobile && user.password === password
+      (user) => user.mobile === mobile && user.password === password
     );
 
     if (!validUser) {
@@ -174,14 +180,14 @@ export default function LoginPortal() {
 
     const users = getUsers();
 
-    const exists = users.find((user: any) => user.mobile === mobile);
+    const exists = users.find((user) => user.mobile === mobile);
 
     if (!exists) {
       alert("No account found");
       return;
     }
 
-    const updatedUsers = users.map((user: any) =>
+    const updatedUsers = users.map((user) =>
       user.mobile === mobile
         ? {
             ...user,

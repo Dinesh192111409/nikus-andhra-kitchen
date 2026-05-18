@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import Image from "next/image";
 import { getActiveMenuItems } from "../utils/menu";
 import type { MenuItem } from "../data/menuItems";
 import { saveOrder } from "../utils/orders";
@@ -16,8 +17,10 @@ const areas = [
   { name: "Whitefield", km: 13 },
 ];
 
+const createDeliveryOrderId = () => crypto.randomUUID();
+
 export default function Delivery() {
-  const [items, setItems] = useState<MenuItem[]>([]);
+  const [items] = useState<MenuItem[]>(() => getActiveMenuItems());
   const [orderType, setOrderType] = useState<"Delivery" | "Pickup">("Delivery");
 
   const [customerName, setCustomerName] = useState("");
@@ -30,10 +33,6 @@ export default function Delivery() {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [paymentDone, setPaymentDone] = useState(false);
   const [cart, setCart] = useState<{ [key: string]: number }>({});
-
-  useEffect(() => {
-    setItems(getActiveMenuItems());
-  }, []);
 
   const addItem = (name: string) => {
     setCart((prev) => ({
@@ -97,7 +96,7 @@ export default function Delivery() {
 
   const saveDeliveryOrder = (payment: string) => {
     saveOrder({
-      id: Date.now().toString(),
+      id: createDeliveryOrderId(),
       type: "delivery",
       customer: customerName,
       phone,
@@ -440,11 +439,13 @@ export default function Delivery() {
                       Scan & Pay
                     </h3>
 
-                    <img
+                    <Image
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=upi://pay?pa=nikusandhrakitchen@upi&pn=Nikus%20Andhra%20Kitchen&am=${grandTotal.toFixed(
                         2
                       )}&cu=INR`}
                       alt="UPI QR"
+                      width={260}
+                      height={260}
                       className="mx-auto mt-8 rounded-3xl border-4 border-black w-[220px] sm:w-[260px]"
                     />
 

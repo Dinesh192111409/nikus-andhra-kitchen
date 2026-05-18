@@ -1,0 +1,675 @@
+
+
+#
+# Fatal process out of memory: Re-embedded builtins: set permissions
+#
+----- Native stack trace -----
+
+ 1: 00007FF708AA6F4D 
+ 2: 00007FF709F0DAC6 
+ 3: 00007FF70979FA86 
+ 4: 00007FF709606DFE 
+ 5: 00007FF70963A3FF 
+ 6: 00007FF70963AEB2 
+ 7: 00007FF70963B892 
+ 8: 00007FF709137703 
+ 9: 00007FF7097CA946 
+10: 00007FF708C63F3D 
+11: 00007FF7089B5243 
+12: 00007FF7089B45D9 
+13: 00007FF7089BDFC0 
+14: 00007FF7097F4A36 
+15: 00007FF70AA55A73 
+16: 00007FFB271AE957 BaseThreadInitThunk+23
+17: 00007FFB282E427C RtlUserThreadStart+44
+
+
+#
+# Fatal process out of memory: Re-embedded builtins: set permissions
+#
+----- Native stack trace -----
+
+ 1: 00007FF708AA6F4D node::MultiIsolatePlatform::DisposeIsolate+5341
+ 2: 00007FF709F0DAC6 v8::base::FatalOOM+54
+ 3: 00007FF70979FA86 v8::Function::NewInstance+390
+ 4: 00007FF709606DFE v8::CppHeap::CollectGarbageInYoungGenerationForTesting+111438
+ 5: 00007FF70963A3FF SSL_CTX_set_default_read_buffer_len+41247
+ 6: 00007FF70963AEB2 SSL_CTX_set_default_read_buffer_len+43986
+ 7: 00007FF70963B892 SSL_CTX_set_default_read_buffer_len+46514
+ 8: 00007FF709137703 v8::internal::Version::GetSONAME+121171
+ 9: 00007FF7097CA946 v8::Isolate::Initialize+662
+10: 00007FF708C63F3D node::SetIsolateUpForNode+749
+11: 00007FF7089B5243 RSA_meth_get_flags+223043
+12: 00007FF7089B45D9 RSA_meth_get_flags+219865
+13: 00007FF7089BDFC0 RSA_meth_get_flags+259264
+14: 00007FF7097F4A36 uv_thread_detach+150
+15: 00007FF70AA55A73 v8::base::UnsignedDivisionByConstant<unsigned __int64>+2907235
+16: 00007FFB271AE957 BaseThreadInitThunk+23
+17: 00007FFB282E427C RtlUserThreadStart+44
+
+<--- Last few GCs --->
+
+[59292:00000166267B7000]     6353 ms: Scavenge (interleaved) 9.4 (12.0) -> 7.8 (11.7) MB, pooled: 0 MB, 1.58 / 0.00 ms  (average mu = 0.272, current mu = 0.272) allocation failure; 
+[59292:00000166267B7000]     9435 ms: Scavenge (interleaved) 9.6 (12.2) -> 9.1 (17.4) MB, pooled: 0 MB, 2030.61 / 0.00 ms  (average mu = 0.272, current mu = 0.272) allocation failure; 
+
+FATAL ERROR: Zone Allocation failed - process out of memory
+----- Native stack trace -----
+
+ 1: 00007FF708B5403F node::OnFatalError+1343
+ 2: 00007FF70979FAA7 v8::Function::NewInstance+423
+ 3: 00007FF709119986 v8::SnapshotCreator::GetIsolate+56566
+ 4: 00007FF7092466CA EC_KEY_METHOD_set_verify+219802
+ 5: 00007FF709245B4A EC_KEY_METHOD_set_verify+216858
+ 6: 00007FF709241179 EC_KEY_METHOD_set_verify+197961
+ 7: 00007FF70971D4EF EVP_MD_CTX_set_update_fn+240879
+ 8: 00007FF7097202F1 EVP_MD_CTX_set_update_fn+252657
+ 9: 00007FF7097A8F63 v8::ScriptCompiler::CompileFunction+1011
+10: 00007FF708B71563 node::GetCurrentEnvironment+20883
+11: 00007FF708B6FD0E node::GetCurrentEnvironment+14654
+12: 000001665EE4F64D 
+
+
+
+#
+<--- Last few GCs --->
+# Fatal error in , line 0
+
+# Out of memory: HashMap::Initialize
+[15856:0000020F7978E000]     3561 ms: Scavenge 8.9 (11.5) -> 7.6 (9.4) MB, pooled: 2 MB, 2.02 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+#
+
+#
+FATAL ERROR: Committing semi space failed. Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+#
+#FailureMessage Object: 0000007BCC7F8B40
+
+----- Native stack trace -----
+ 1: 00007FF708B5403F 
+
+ 2: 00007FF70979FAA7 
+ 1: 00007FF708AA6F4D 
+ 3: 00007FF7095A04D7 
+ 2: 00007FF709F0E05F 
+ 4: 00007FF709538EFB 
+ 3: 00007FF70979DB46 
+ 5: 00007FF70951094E 
+ 4: 00007FF70979D232 
+ 6: 00007FF7095A2F72 
+ 5: 00007FF70979D060 
+ 7: 00007FF7095A1F27 
+ 6: 00007FF70922434F 
+ 8: 00007FF7095B2E52 
+ 7: 00007FF709263B47 
+ 9: 00007FF7095B297B 
+ 8: 00007FF709262976 
+10: 00007FF70AA3A2AD 
+ 9: 00007FF709259F66 
+11: 00007FF70959DFA0 
+10: 00007FF70925B66B 
+12: 00007FF7095B87EA 
+13: 00007FF7095C4648 
+11: 00007FF70925A83E 
+12: 00007FF70925B0A6 
+14: 00007FF7095DC03C 
+13: 00007FF70925A884 
+15: 00007FF7095DBFD5 
+14: 00007FF709260204 
+16: 00007FF7092BA81E 
+15: 00007FF70926B61F 
+17: 00007FF7092BAFF1 
+16: 00007FF709254DEB 
+18: 00007FF7093CFB68 
+17: 00007FF70924A82A 
+19: 00007FF7093CE816 
+18: 00007FF70925B560 
+20: 00007FF709352A4E 
+19: 00007FF70925A884 
+21: 00007FF7092C8DF7 
+20: 00007FF709260204 
+21: 00007FF70925E68E 
+22: 00007FF709345C1B 
+23: 00007FF70934FABE 
+22: 00007FF70925B66B 
+24: 00007FF709192FFF 
+23: 00007FF70925A83E 
+25: 00007FF709192F91 
+24: 00007FF709260204 
+26: 00007FF709191A13 
+25: 00007FF70926B61F 
+27: 0000020F37E775FA 
+26: 00007FF709254DEB 
+27: 00007FF70924A82A 
+28: 00007FF70925B560 
+29: 00007FF70925A884 
+30: 00007FF709260204 
+31: 00007FF70925E68E 
+32: 00007FF70925B66B 
+33: 00007FF70925A83E 
+34: 00007FF709260204 
+35: 00007FF70926B61F 
+36: 00007FF709254DEB 
+37: 00007FF7092542EA 
+38: 00007FF7092479E7 
+39: 00007FF709246BB4 
+40: 00007FF709245EA2 
+41: 00007FF709245B4A 
+42: 00007FF709241179 
+43: 00007FF70971D4EF 
+44: 00007FF7097202F1 
+45: 00007FF7097A8F63 
+46: 00007FF708B71563 
+47: 00007FF708B6FD0E 
+48: 000001C227DCF64D 
+
+<--- Last few GCs --->
+
+[57428:000002110A105000]     5360 ms: Scavenge 8.9 (11.5) -> 7.6 (9.4) MB, pooled: 2 MB, 3.73 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+[57428:000002110A105000]     7475 ms: Scavenge 9.7 (10.7) -> 9.0 (17.7) MB, pooled: 0 MB, 2019.45 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+
+FATAL ERROR: Zone Allocation failed - process out of memory
+----- Native stack trace -----
+
+ 1: 00007FF708B5403F 
+ 2: 00007FF70979FAA7 
+ 3: 00007FF709119986 
+ 4: 00007FF708FCA482 
+ 5: 00007FF708F6BA1D 
+ 6: 00007FF708F6C11F 
+ 7: 00007FF708FA4E4A 
+ 8: 00007FF708F7AB0B 
+ 9: 00007FF708FF2C76 
+10: 00007FF708FF1990 
+11: 00007FF708FEF78A 
+12: 00007FF70971376F 
+13: 00007FF708FF126B 
+14: 00007FF709F80C5F 
+15: 00007FF708AA2E0E 
+16: 00007FF7097F4A36 
+17: 00007FF70AA55A73 
+18: 00007FFB271AE957 BaseThreadInitThunk+23
+19: 00007FFB282E427C RtlUserThreadStart+44
+
+<--- Last few GCs --->
+
+[41068:000001CFDCCD4000]      304 ms: Scavenge 8.9 (11.5) -> 7.7 (11.4) MB, pooled: 0 MB, 4.23 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+
+[41068:000001CFDCCD4000]     2421 ms: Scavenge 9.7 (12.5) -> 9.0 (17.7) MB, pooled: 0 MB, 2021.25 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+<--- Last few GCs --->
+
+[3664:000001BBFCFE1000]      171 ms: Scavenge 6.2 (7.6) -> 5.5 (10.3) MB, pooled: 0 MB, 2.35 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+FATAL ERROR: Zone Allocation failed - process out of memory
+
+----- Native stack trace -----
+FATAL ERROR: Zone Allocation failed - process out of memory
+
+----- Native stack trace -----
+
+ 1: 00007FF708B5403F 
+ 2: 00007FF70979FAA7 
+ 3: 00007FF709119986 
+ 4: 00007FF708CDAD33 
+ 5: 00007FF70A1724F0 
+ 6: 00007FF70A14D3FC 
+ 7: 00007FF70A65053D 
+ 1: 00007FF708B5403F 
+ 8: 00007FF70A651B57 
+ 2: 00007FF70979FAA7 
+ 9: 00007FF70A6400DC 
+ 3: 00007FF709119986 
+10: 00007FF70A63FEF6 
+ 4: 00007FF709786AC6 
+11: 00007FF70A6529CD 
+ 5: 00007FF709259EA6 
+12: 00007FF70A1BB878 
+ 6: 00007FF70925B66B 
+13: 00007FF70A195F0D 
+ 7: 00007FF70925A83E 
+14: 00007FF70A193099 
+ 8: 00007FF709260204 
+15: 00007FF70A192CFE 
+ 9: 00007FF70925E68E 
+16: 00007FF70971376F 
+10: 00007FF70925B66B 
+17: 00007FF7096D87FD 
+11: 00007FF70925A83E 
+18: 00007FF7096D84F5 
+12: 00007FF70925A4F9 
+19: 00007FF709F80C5F 
+13: 00007FF709262CC0 
+20: 00007FF708AA2E0E 
+14: 00007FF709259F66 
+21: 00007FF7097F4A36 
+15: 00007FF70925B66B 
+22: 00007FF70AA55A73 
+16: 00007FF70925A83E 
+23: 00007FFB271AE957 BaseThreadInitThunk+23
+17: 00007FF70926C712 
+24: 00007FFB282E427C RtlUserThreadStart+44
+
+18: 00007FF70924C1E5 
+
+19: 00007FF709254DEB 
+#
+
+20: 00007FF7092542EA 
+# Fatal process out of memory: Re-embedded builtins: set permissions
+
+21: 00007FF7092479E7 
+#
+#
+22: 00007FF709246BB4 
+----- Native stack trace -----
+# Fatal process out of memory: Re-embedded builtins: set permissions
+23: 00007FF709245EA2 
+
+
+
+24: 00007FF709245B4A 
+#
+
+
+25: 00007FF709241179 
+----- Native stack trace -----
+#
+#
+26: 00007FF70971D4EF 
+
+# Fatal process out of memory: Re-embedded builtins: set permissions
+# Fatal process out of memory: Re-embedded builtins: set permissions
+27: 00007FF7097202F1 
+#
+
+28: 00007FF7097A8F63 
+----- Native stack trace -----
+<--- Last few GCs --->
+#
+29: 00007FF708B71563 
+
+
+----- Native stack trace -----
+30: 00007FF708B6FD0E 
+FATAL ERROR: Committing semi space failed. Allocation failed - JavaScript heap out of memory
+ 1: 00007FF708AA6F4D node::MultiIsolatePlatform::DisposeIsolate+5341
+ 1: 00007FF708AA6F4D node::MultiIsolatePlatform::DisposeIsolate+5341
+
+31: 000001BBB7DCF64D 
+----- Native stack trace -----
+ 2: 00007FF709F0DAC6 v8::base::FatalOOM+54
+ 2: 00007FF709F0DAC6 v8::base::FatalOOM+54
+
+ 3: 00007FF70979FA86 v8::Function::NewInstance+390
+ 3: 00007FF70979FA86 v8::Function::NewInstance+390
+ 4: 00007FF709606DFE v8::CppHeap::CollectGarbageInYoungGenerationForTesting+111438
+ 4: 00007FF709606DFE v8::CppHeap::CollectGarbageInYoungGenerationForTesting+111438
+ 5: 00007FF70963A3FF SSL_CTX_set_default_read_buffer_len+41247
+ 5: 00007FF70963A3FF SSL_CTX_set_default_read_buffer_len+41247
+ 1: 00007FF708AA6F4D node::MultiIsolatePlatform::DisposeIsolate+5341
+ 6: 00007FF70963AEB2 SSL_CTX_set_default_read_buffer_len+43986
+ 6: 00007FF70963AEB2 SSL_CTX_set_default_read_buffer_len+43986
+ 2: 00007FF709F0DAC6 v8::base::FatalOOM+54
+ 7: 00007FF70963B892 SSL_CTX_set_default_read_buffer_len+46514
+ 7: 00007FF70963B892 SSL_CTX_set_default_read_buffer_len+46514
+ 1: 00007FF708AA6F4D node::MultiIsolatePlatform::DisposeIsolate+5341
+ 3: 00007FF70979FA86 v8::Function::NewInstance+390
+ 8: 00007FF709137703 v8::internal::Version::GetSONAME+121171
+ 8: 00007FF709137703 v8::internal::Version::GetSONAME+121171
+ 1: 00007FF708B5403F 
+ 4: 00007FF709606DFE v8::CppHeap::CollectGarbageInYoungGenerationForTesting+111438
+ 9: 00007FF7097CA946 v8::Isolate::Initialize+662
+ 2: 00007FF709F0DAC6 v8::base::FatalOOM+54
+ 9: 00007FF7097CA946 v8::Isolate::Initialize+662
+ 2: 00007FF70979FAA7 
+ 5: 00007FF70963A3FF SSL_CTX_set_default_read_buffer_len+41247
+10: 00007FF708C63F3D node::SetIsolateUpForNode+749
+ 3: 00007FF70979FA86 v8::Function::NewInstance+390
+10: 00007FF708C63F3D node::SetIsolateUpForNode+749
+ 3: 00007FF7095A04D7 
+ 6: 00007FF70963AEB2 SSL_CTX_set_default_read_buffer_len+43986
+ 4: 00007FF709606DFE v8::CppHeap::CollectGarbageInYoungGenerationForTesting+111438
+11: 00007FF7089B5243 RSA_meth_get_flags+223043
+11: 00007FF7089B5243 RSA_meth_get_flags+223043
+ 4: 00007FF709538EFB 
+ 5: 00007FF70963A3FF SSL_CTX_set_default_read_buffer_len+41247
+12: 00007FF7089B45D9 RSA_meth_get_flags+219865
+ 7: 00007FF70963B892 SSL_CTX_set_default_read_buffer_len+46514
+12: 00007FF7089B45D9 RSA_meth_get_flags+219865
+ 5: 00007FF70951094E 
+ 8: 00007FF709137703 v8::internal::Version::GetSONAME+121171
+13: 00007FF7089BDFC0 RSA_meth_get_flags+259264
+ 6: 00007FF70963AEB2 SSL_CTX_set_default_read_buffer_len+43986
+13: 00007FF7089BDFC0 RSA_meth_get_flags+259264
+ 6: 00007FF7095A2F72 
+ 9: 00007FF7097CA946 v8::Isolate::Initialize+662
+14: 00007FF7097F4A36 uv_thread_detach+150
+ 7: 00007FF70963B892 SSL_CTX_set_default_read_buffer_len+46514
+14: 00007FF7097F4A36 uv_thread_detach+150
+ 7: 00007FF7095A1F27 
+10: 00007FF708C63F3D node::SetIsolateUpForNode+749
+ 8: 00007FF709137703 v8::internal::Version::GetSONAME+121171
+15: 00007FF70AA55A73 v8::base::UnsignedDivisionByConstant<unsigned __int64>+2907235
+15: 00007FF70AA55A73 v8::base::UnsignedDivisionByConstant<unsigned __int64>+2907235
+ 9: 00007FF7097CA946 v8::Isolate::Initialize+662
+11: 00007FF7089B5243 RSA_meth_get_flags+223043
+16: 00007FFB271AE957 BaseThreadInitThunk+23
+ 8: 00007FF7095B2E52 
+ 9: 00007FF7095B297B 
+16: 00007FFB271AE957 BaseThreadInitThunk+23
+12: 00007FF7089B45D9 RSA_meth_get_flags+219865
+17: 00007FFB282E427C RtlUserThreadStart+44
+10: 00007FF708C63F3D node::SetIsolateUpForNode+749
+17: 00007FFB282E427C RtlUserThreadStart+44
+10: 00007FF70AA3A2AD 
+13: 00007FF7089BDFC0 RSA_meth_get_flags+259264
+11: 00007FF7089B5243 RSA_meth_get_flags+223043
+11: 00007FF70959DFA0 
+14: 00007FF7097F4A36 uv_thread_detach+150
+12: 00007FF7089B45D9 RSA_meth_get_flags+219865
+12: 00007FF7095B87EA 
+15: 00007FF70AA55A73 v8::base::UnsignedDivisionByConstant<unsigned __int64>+2907235
+13: 00007FF7089BDFC0 RSA_meth_get_flags+259264
+13: 00007FF7095C4C86 
+16: 00007FFB271AE957 BaseThreadInitThunk+23
+14: 00007FF7097F4A36 uv_thread_detach+150
+14: 00007FF7091969C7 
+17: 00007FFB282E427C RtlUserThreadStart+44
+15: 00007FF70AA55A73 v8::base::UnsignedDivisionByConstant<unsigned __int64>+2907235
+15: 000001F54FE775FA 
+16: 00007FFB271AE957 BaseThreadInitThunk+23
+17: 00007FFB282E427C RtlUserThreadStart+44
+
+
+
+<--- Last few GCs --->
+<--- Last few GCs --->
+
+[14528:000001FA7125F000]      181 ms: Scavenge 6.2 (7.3) -> 5.5 (10.1) MB, pooled: 0 MB, 2.36 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+
+#
+
+[59196:000001940BD3D000]    12540 ms: Scavenge 8.9 (11.5) -> 7.6 (9.4) MB, pooled: 2 MB, 5.19 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+# Fatal error in , line 0
+FATAL ERROR: Zone Allocation failed - process out of memory
+[59196:000001940BD3D000]    12650 ms: Scavenge 9.7 (10.7) -> 9.1 (17.7) MB, pooled: 0 MB, 9.51 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+# Out of memory: HashMap::Initialize
+----- Native stack trace -----
+
+#
+
+#
+FATAL ERROR: Zone Allocation failed - process out of memory
+ 1: 00007FF708B5403F node::OnFatalError+1343
+#
+----- Native stack trace -----
+ 2: 00007FF70979FAA7 v8::Function::NewInstance+423
+#FailureMessage Object: 00000051C4DFA050
+
+ 3: 00007FF709119986 v8::SnapshotCreator::GetIsolate+56566
+----- Native stack trace -----
+ 1: 00007FF708B5403F node::OnFatalError+1343
+ 4: 00007FF708D12041 v8::internal::Version::GetVersion+165185
+
+ 2: 00007FF70979FAA7 v8::Function::NewInstance+423
+ 5: 00007FF7091DE3B6 v8::base::CPU::has_bmi2+15030
+ 1: 00007FF708AA6F4D node::MultiIsolatePlatform::DisposeIsolate+5341
+ 3: 00007FF709119986 v8::SnapshotCreator::GetIsolate+56566
+ 6: 00007FF7091E3B4C v8::base::CPU::has_bmi2+37452
+ 2: 00007FF709F0E05F V8_Fatal+287
+ 4: 00007FF708F4336B SSL_CTX_get_client_CA_list+9771
+ 7: 00007FF7091C5DCB v8::base::CPU::family+39883
+ 3: 00007FF70979DB46 EVP_MD_CTX_set_update_fn+766790
+ 5: 00007FF708F43843 SSL_CTX_get_client_CA_list+11011
+ 8: 00007FF7091A9200 v8::String::Utf8Value::~Utf8Value+220032
+ 4: 00007FF70979D232 EVP_MD_CTX_set_update_fn+764466
+ 6: 00007FF708F3DD74 v8::internal::OptimizingCompileInputQueue::OptimizingCompileInputQueue+196644
+ 9: 00007FF7091A8922 v8::String::Utf8Value::~Utf8Value+217762
+ 5: 00007FF70979D060 EVP_MD_CTX_set_update_fn+764000
+ 7: 00007FF708FA8252 SSL_CTX_get_client_CA_list+423186
+10: 00007FF7091A7219 v8::String::Utf8Value::~Utf8Value+211865
+ 6: 00007FF70922434F EC_KEY_METHOD_set_verify+79647
+ 8: 00007FF708FAC94F SSL_CTX_get_client_CA_list+441359
+11: 00007FF7091A74AC v8::String::Utf8Value::~Utf8Value+212524
+ 7: 00007FF709244F76 EC_KEY_METHOD_set_verify+213830
+ 9: 00007FF708FA5217 SSL_CTX_get_client_CA_list+410839
+12: 00007FF7091A738B v8::String::Utf8Value::~Utf8Value+212235
+ 8: 00007FF70925B66B EC_KEY_METHOD_set_verify+305723
+10: 00007FF708F7AB0B SSL_CTX_get_client_CA_list+237003
+13: 00007FF70917E292 v8::String::Utf8Value::~Utf8Value+44050
+ 9: 00007FF70925A83E EC_KEY_METHOD_set_verify+302094
+11: 00007FF708F7A6E2 SSL_CTX_get_client_CA_list+235938
+
+
+14: 000001FA2FE775FA 
+10: 00007FF70925A4F9 EC_KEY_METHOD_set_verify+301257
+12: 00007FF708F7C695 SSL_CTX_get_client_CA_list+244053
+
+
+11: 00007FF7092598D1 EC_KEY_METHOD_set_verify+298145
+13: 00007FF708F7BB3E SSL_CTX_get_client_CA_list+241150
+#
+#
+12: 00007FF70925B66B EC_KEY_METHOD_set_verify+305723
+14: 00007FF708F8F0A1 SSL_CTX_get_client_CA_list+320353
+# Fatal process out of memory: Re-embedded builtins: set permissions
+# Fatal process out of memory: Re-embedded builtins: set permissions
+13: 00007FF70925A83E EC_KEY_METHOD_set_verify+302094
+15: 00007FF708F63F05 SSL_CTX_get_client_CA_list+143813
+#
+#
+14: 00007FF7092610A2 EC_KEY_METHOD_set_verify+328818
+16: 00007FF708F7F632 SSL_CTX_get_client_CA_list+256242
+----- Native stack trace -----
+----- Native stack trace -----
+15: 00007FF70925F370 EC_KEY_METHOD_set_verify+321344
+17: 00007FF708F90CF6 SSL_CTX_get_client_CA_list+327606
+
+
+16: 00007FF70925B66B EC_KEY_METHOD_set_verify+305723
+ 1: 00007FF708AA6F4D 
+18: 00007FF708F91AF7 SSL_CTX_get_client_CA_list+331191
+17: 00007FF70925A83E EC_KEY_METHOD_set_verify+302094
+19: 00007FF708FA5ECA SSL_CTX_get_client_CA_list+414090
+ 2: 00007FF709F0DAC6 
+18: 00007FF70926C712 EC_KEY_METHOD_set_verify+375522
+20: 00007FF708F7AB0B SSL_CTX_get_client_CA_list+237003
+ 3: 00007FF70979FA86 
+ 1: 00007FF708AA6F4D 
+19: 00007FF70924C1E5 EC_KEY_METHOD_set_verify+243125
+21: 00007FF708FF2C76 SSL_CTX_get_client_CA_list+728886
+ 4: 00007FF709606DFE 
+20: 00007FF709254DEB EC_KEY_METHOD_set_verify+278971
+22: 00007FF708FF1990 SSL_CTX_get_client_CA_list+724048
+ 5: 00007FF70963A3FF 
+ 2: 00007FF709F0DAC6 
+21: 00007FF7092542EA EC_KEY_METHOD_set_verify+276154
+23: 00007FF708FEF78A SSL_CTX_get_client_CA_list+715338
+22: 00007FF7092479E7 EC_KEY_METHOD_set_verify+224695
+ 3: 00007FF70979FA86 
+ 6: 00007FF70963AEB2 
+24: 00007FF70971376F EVP_MD_CTX_set_update_fn+200559
+ 7: 00007FF70963B892 
+ 4: 00007FF709606DFE 
+23: 00007FF709246BB4 EC_KEY_METHOD_set_verify+221060
+25: 00007FF708FF126B SSL_CTX_get_client_CA_list+722219
+ 8: 00007FF709137703 
+ 5: 00007FF70963A3FF 
+24: 00007FF709245EA2 EC_KEY_METHOD_set_verify+217714
+26: 00007FF709F80C5F v8::platform::DefaultJobHandle::UpdatePriority+591
+ 9: 00007FF7097CA946 
+ 6: 00007FF70963AEB2 
+25: 00007FF709245B4A EC_KEY_METHOD_set_verify+216858
+27: 00007FF708AA2E0E node::GetNodeReport+90430
+10: 00007FF708C63F3D 
+ 7: 00007FF70963B892 
+26: 00007FF709241179 EC_KEY_METHOD_set_verify+197961
+28: 00007FF7097F4A36 uv_thread_detach+150
+11: 00007FF7089B5243 
+ 8: 00007FF709137703 
+27: 00007FF70971D4EF EVP_MD_CTX_set_update_fn+240879
+29: 00007FF70AA55A73 v8::base::UnsignedDivisionByConstant<unsigned __int64>+2907235
+12: 00007FF7089B45D9 
+ 9: 00007FF7097CA946 
+28: 00007FF7097202F1 EVP_MD_CTX_set_update_fn+252657
+30: 00007FFB271AE957 BaseThreadInitThunk+23
+13: 00007FF7089BDFC0 
+10: 00007FF708C63F3D 
+29: 00007FF7097A8F63 v8::ScriptCompiler::CompileFunction+1011
+14: 00007FF7097F4A36 
+31: 00007FFB282E427C RtlUserThreadStart+44
+11: 00007FF7089B5243 
+30: 00007FF708B71563 node::GetCurrentEnvironment+20883
+15: 00007FF70AA55A73 
+12: 00007FF7089B45D9 
+31: 00007FF708B6FD0E node::GetCurrentEnvironment+14654
+16: 00007FFB271AE957 BaseThreadInitThunk+23
+13: 00007FF7089BDFC0 
+32: 00000198DB48F64D 
+17: 00007FFB282E427C RtlUserThreadStart+44
+14: 00007FF7097F4A36 
+15: 00007FF70AA55A73 
+16: 00007FFB271AE957 BaseThreadInitThunk+23
+17: 00007FFB282E427C RtlUserThreadStart+44
+
+thread 'tokio-runtime-worker' (8436) panicked at C:\Users\runneradmin\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-1.43.0\src\io\blocking.rs:76:46:
+OS can't spawn worker thread: Insufficient system resources exist to complete the requested service. (os error 1450)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'tokio-runtime-worker' (38392) panicked at C:\Users\runneradmin\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-1.43.0\src\io\blocking.rs:76:46:
+OS can't spawn worker thread: The paging file is too small for this operation to complete. (os error 1455)
+
+<--- Last few GCs --->
+
+
+
+#
+# Fatal JavaScript out of memory: MemoryChunk allocation failed during deserialization.
+#
+----- Native stack trace -----
+
+ 1: 00007FF708AA6F4D 
+ 2: 00007FF709F0DAC6 
+ 3: 00007FF70979FA86 
+ 4: 00007FF7095A04D7 
+ 5: 00007FF70955272A 
+ 6: 00007FF7095527EC 
+ 7: 00007FF7095530DB 
+ 8: 00007FF70952A331 
+ 9: 00007FF7095901E3 
+10: 00007FF70958FF4E 
+11: 00007FF70958ED38 
+12: 00007FF70958ECBA 
+13: 00007FF7095B8715 
+14: 00007FF709154DD8 
+15: 00007FF709152BAC 
+16: 00007FF709159E2E 
+17: 00007FF7091535DD 
+18: 00007FF7095A8498 
+19: 00007FF709131F33 
+20: 00007FF70963B49C 
+21: 00007FF70963B892 
+22: 00007FF709137703 
+23: 00007FF7097CA946 
+24: 00007FF708C63F3D 
+25: 00007FF7089B5243 
+26: 00007FF7089B45D9 
+27: 00007FF7089BDFC0 
+28: 00007FF7097F4A36 
+29: 00007FF70AA55A73 
+30: 00007FFB271AE957 BaseThreadInitThunk+23
+31: 00007FFB282E427C RtlUserThreadStart+44
+
+<--- Last few GCs --->
+
+[36496:000001C723CCD000]      613 ms: Scavenge 8.9 (11.5) -> 7.6 (11.4) MB, pooled: 0 MB, 3.60 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+[36496:000001C723CCD000]      735 ms: Scavenge 9.7 (12.7) -> 9.0 (17.7) MB, pooled: 0 MB, 5.02 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+
+FATAL ERROR: Zone Allocation failed - process out of memory
+----- Native stack trace -----
+
+ 1: 00007FF708B5403F 
+ 2: 00007FF70979FAA7 
+ 3: 00007FF709119986 
+ 4: 00007FF708F43516 
+ 5: 00007FF708F434E8 
+ 6: 00007FF708F434D6 
+ 7: 00007FF708F43AD3 
+ 8: 00007FF708F43881 
+ 9: 00007FF708F3DD74 
+10: 00007FF708F45E2E 
+11: 00007FF708F45A80 
+12: 00007FF708FAA344 
+13: 00007FF708FA9F32 
+14: 00007FF708FA7DEB 
+15: 00007FF708FA5907 
+16: 00007FF708F7AB0B 
+17: 00007FF708FF2C76 
+18: 00007FF708FF1990 
+19: 00007FF708FEF78A 
+20: 00007FF70971376F 
+21: 00007FF708FF126B 
+22: 00007FF709F80C5F 
+23: 00007FF708AA2E0E 
+24: 00007FF7097F4A36 
+25: 00007FF70AA55A73 
+26: 00007FFB271AE957 BaseThreadInitThunk+23
+27: 00007FFB282E427C RtlUserThreadStart+44
+
+
+#
+# Fatal process out of memory: Re-embedded builtins: set permissions
+#
+----- Native stack trace -----
+
+ 1: 00007FF708AA6F4D node::MultiIsolatePlatform::DisposeIsolate+5341
+ 2: 00007FF709F0DAC6 v8::base::FatalOOM+54
+ 3: 00007FF70979FA86 v8::Function::NewInstance+390
+ 4: 00007FF709606DFE v8::CppHeap::CollectGarbageInYoungGenerationForTesting+111438
+ 5: 00007FF70963A3FF SSL_CTX_set_default_read_buffer_len+41247
+ 6: 00007FF70963AEB2 SSL_CTX_set_default_read_buffer_len+43986
+ 7: 00007FF70963B892 SSL_CTX_set_default_read_buffer_len+46514
+ 8: 00007FF709137703 v8::internal::Version::GetSONAME+121171
+ 9: 00007FF7097CA946 v8::Isolate::Initialize+662
+10: 00007FF708C63F3D node::SetIsolateUpForNode+749
+11: 00007FF7089B5243 RSA_meth_get_flags+223043
+12: 00007FF7089B45D9 RSA_meth_get_flags+219865
+13: 00007FF7089BDFC0 RSA_meth_get_flags+259264
+14: 00007FF7097F4A36 uv_thread_detach+150
+15: 00007FF70AA55A73 v8::base::UnsignedDivisionByConstant<unsigned __int64>+2907235
+16: 00007FFB271AE957 BaseThreadInitThunk+23
+17: 00007FFB282E427C RtlUserThreadStart+44
+
+
+
+#
+<--- Last few GCs --->
+
+# Fatal process out of memory: Re-embedded builtins: set permissions
+
+<--- Last few GCs --->
+#
+FATAL ERROR: Committing semi space failed. Allocation failed - JavaScript heap out of memory
+
+----- Native stack trace -----
+----- Native stack trace -----
+
+FATAL ERROR: Committing semi space failed. Allocation failed - JavaScript heap out of memory
+
+----- Native stack trace -----
+
+ 1: 00007FF708AA6F4D 
+ 2: 00007FF709F0DAC6 
+ 3: 00007FF70979FA86 
+ 4: 00007FF709606DFE 
+ 5: 00007FF70963A3FF 
+ 6: 00007FF70963AEB2 
+ 7: 00007FF70963B892 
+ 8: 00007FF709137703 
+ 9: 00007FF7097CA946 
+10: 00007FF708C63F3D 
+11: 00007FF7089B5243 
+12: 00007FF7089B45D9 
+13: 00007FF7089BDFC0 
+14: 00007FF7097F4A36 
+15: 00007FF70AA55A73 
+16: 00007FFB271AE957 BaseThreadInitThunk+23
+17: 00007FFB282E427C RtlUserThreadStart+44

@@ -8,9 +8,27 @@ import {
   updateOrderStatus,
 } from "../../utils/orders";
 
+const getInitialMenuItems = (): MenuItem[] => {
+  if (typeof window === "undefined") return [];
+
+  const savedMenu = localStorage.getItem("nikus_menu");
+
+  if (!savedMenu) {
+    localStorage.setItem("nikus_menu", JSON.stringify(menuItems));
+    return menuItems;
+  }
+
+  try {
+    return JSON.parse(savedMenu) as MenuItem[];
+  } catch {
+    localStorage.setItem("nikus_menu", JSON.stringify(menuItems));
+    return menuItems;
+  }
+};
+
 export default function OwnerDashboard() {
-  const [items, setItems] = useState<MenuItem[]>([]);
-  const [orders, setOrders] = useState<CustomerOrder[]>([]);
+  const [items, setItems] = useState<MenuItem[]>(() => getInitialMenuItems());
+  const [orders, setOrders] = useState<CustomerOrder[]>(() => getOrders());
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -25,16 +43,6 @@ export default function OwnerDashboard() {
       return;
     }
 
-    const savedMenu = localStorage.getItem("nikus_menu");
-
-    if (savedMenu) {
-      setItems(JSON.parse(savedMenu));
-    } else {
-      setItems(menuItems);
-      localStorage.setItem("nikus_menu", JSON.stringify(menuItems));
-    }
-
-    setOrders(getOrders());
   }, []);
 
   const refreshOrders = () => {
@@ -387,6 +395,7 @@ export default function OwnerDashboard() {
                 key={item.id}
                 className="bg-white text-black rounded-[30px] overflow-hidden shadow-2xl"
               >
+                {/* eslint-disable-next-line @next/next/no-img-element -- Owner-added menu images may come from arbitrary URLs outside the optimized image allowlist. */}
                 <img
                   src={item.image}
                   alt={item.name}

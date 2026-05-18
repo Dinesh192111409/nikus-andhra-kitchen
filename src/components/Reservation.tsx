@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import Image from "next/image";
 import { getActiveMenuItems } from "../utils/menu";
 import type { MenuItem } from "../data/menuItems";
 import { saveOrder } from "../utils/orders";
@@ -14,12 +15,19 @@ type Booking = {
   period: string;
 };
 
-export default function Reservation() {
-  const [items, setItems] = useState<MenuItem[]>([]);
+type ClosedDining = Booking & {
+  items: string[];
+  subtotal: number;
+  gst: number;
+  total: number;
+  payment: string;
+};
 
-  useEffect(() => {
-    setItems(getActiveMenuItems());
-  }, []);
+const createReservationOrderId = (prefix: string) =>
+  `${prefix}-${crypto.randomUUID()}`;
+
+export default function Reservation() {
+  const [items] = useState<MenuItem[]>(() => getActiveMenuItems());
 
   const tables = [1, 2, 3, 4, 5, 6, 7];
 
@@ -39,7 +47,7 @@ export default function Reservation() {
   >("UPI");
 
   const [cart, setCart] = useState<{ [key: string]: number }>({});
-  const [closedDining, setClosedDining] = useState<any[]>([]);
+  const [closedDining, setClosedDining] = useState<ClosedDining[]>([]);
   const [showClosedDining, setShowClosedDining] = useState(false);
 
   const [name, setName] = useState("");
@@ -60,7 +68,6 @@ export default function Reservation() {
 
   const gst = subtotal * 0.05;
   const total = subtotal + gst;
-
   const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
 
   const orderedItems = items
@@ -91,7 +98,7 @@ export default function Reservation() {
     setBookedTables((prev) => [...prev, newBooking]);
 
     saveOrder({
-      id: `reservation-${Date.now()}`,
+      id: createReservationOrderId("reservation"),
       type: "reservation",
       customer: name,
       phone,
@@ -105,10 +112,10 @@ export default function Reservation() {
       total: 0,
       payment: "Reservation only",
       status: "Pending",
-      date: new Date().toLocaleString(),
+      date: new Date().toLocaleString("en-IN"),
     });
 
-    alert(`Table ${selectedTable} Reserved Successfully`);
+    alert(`Table ${selectedTable} reserved successfully`);
 
     setSelectedTable(null);
     setShowBooking(false);
@@ -126,17 +133,24 @@ export default function Reservation() {
   };
 
   const removeItem = (itemName: string) => {
-    setCart((prev) => ({
-      ...prev,
-      [itemName]: prev[itemName] > 1 ? prev[itemName] - 1 : 0,
-    }));
+    setCart((prev) => {
+      const updated = { ...prev };
+
+      if (updated[itemName] > 1) {
+        updated[itemName] -= 1;
+      } else {
+        delete updated[itemName];
+      }
+
+      return updated;
+    });
   };
 
   const closeTable = (payment: string) => {
     if (!selectedBooking) return;
 
     saveOrder({
-      id: `dining-${Date.now()}`,
+      id: createReservationOrderId("dining"),
       type: "reservation",
       customer: selectedBooking.name,
       phone: selectedBooking.phone,
@@ -151,7 +165,7 @@ export default function Reservation() {
       total,
       payment,
       status: "Pending",
-      date: new Date().toLocaleString(),
+      date: new Date().toLocaleString("en-IN"),
     });
 
     setClosedDining((prev) => [
@@ -195,12 +209,17 @@ export default function Reservation() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-14 md:mb-20">
           <p className="text-orange-400 uppercase tracking-[0.25em] sm:tracking-[0.35em] font-black text-xs sm:text-sm">
-            Smart Dining System
+            Restaurant POS Table Service
           </p>
 
           <h2 className="text-4xl sm:text-5xl md:text-7xl font-black mt-6 leading-tight">
-            TABLE RESERVATION
+            DINE-IN TABLE ORDERING
           </h2>
+
+          <p className="text-gray-300 mt-5 text-base sm:text-lg font-semibold">
+            Reserve table, add food, generate KOT, collect payment and close
+            table.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 md:gap-16">
@@ -243,7 +262,7 @@ export default function Reservation() {
                     Table {table}
 
                     <div className="text-xs sm:text-sm mt-3">
-                      {booking ? "Booked - Open" : "Available"}
+                      {booking ? "Running Order" : "Available"}
                     </div>
                   </button>
                 );
@@ -270,7 +289,7 @@ export default function Reservation() {
               <div className="mt-8 md:mt-10 space-y-5 md:space-y-6">
                 <input
                   type="text"
-                  placeholder="Your Name"
+                  placeholder="Customer Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full p-4 md:p-5 rounded-2xl text-base sm:text-lg md:text-xl outline-none"
@@ -329,7 +348,9 @@ export default function Reservation() {
                 <p className="font-black text-xl">
                   Customer: {selectedBooking.name}
                 </p>
-                <p className="font-bold mt-2">Phone: {selectedBooking.phone}</p>
+                <p className="font-bold mt-2">
+                  Phone: {selectedBooking.phone}
+                </p>
                 <p className="font-bold mt-2">
                   Time: {selectedBooking.date}, {selectedBooking.time}{" "}
                   {selectedBooking.period}
@@ -525,11 +546,13 @@ export default function Reservation() {
 
                   {paymentMode !== "Cash" ? (
                     <div className="mt-8 text-center">
-                      <img
+                      <Image
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(
                           upiLink
                         )}`}
                         alt="UPI QR Code"
+                        width={260}
+                        height={260}
                         className="mx-auto rounded-2xl border-4 border-black w-[220px] sm:w-[260px]"
                       />
 

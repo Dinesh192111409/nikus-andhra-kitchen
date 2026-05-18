@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const galleryImages = [
   {
     title: "Hyderabadi Dum Biryani",
@@ -119,9 +121,16 @@ export default function Gallery() {
               }`}
             >
 
-              <img
+              <Image
                 src={item.image}
                 alt={item.title}
+                width={1200}
+                height={800}
+                sizes={
+                  index === 0 || index === 5
+                    ? "(max-width: 1024px) 100vw, 50vw"
+                    : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                }
                 className={`w-full object-cover group-hover:scale-110 transition duration-700
                   
                   ${
