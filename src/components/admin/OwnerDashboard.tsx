@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { auth } from "../../lib/firebase";
 import { menuItems, MenuItem } from "../../data/menuItems";
 import {
@@ -32,14 +34,31 @@ export default function OwnerDashboard() {
   const [mounted, setMounted] = useState(false);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [orders, setOrders] = useState<FirebaseOrder[]>([]);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const lastOrderCountRef = useRef(0);
+  const soundEnabledRef = useRef(false);
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("Biryani");
   const [image, setImage] = useState("");
 
+  const [filterDate, setFilterDate] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterPayment, setFilterPayment] = useState("All");
+  const [filterMonth, setFilterMonth] = useState("All");
+  const [filterYear, setFilterYear] = useState("All");
+  const [menuSearch, setMenuSearch] = useState("");
+  const [selectedMenuCategory, setSelectedMenuCategory] = useState("");
+  const [selectedMenuIds, setSelectedMenuIds] = useState<string[]>([]);
+
   useEffect(() => {
     setMounted(true);
+
+    audioRef.current = new Audio("/order-alert.mp3");
+    audioRef.current.loop = true;
 
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -50,6 +69,22 @@ export default function OwnerDashboard() {
       setItems(getInitialMenuItems());
 
       const unsubscribeOrders = listenToOrders((firebaseOrders) => {
+        if (
+          soundEnabledRef.current &&
+          lastOrderCountRef.current !== 0 &&
+          firebaseOrders.length > lastOrderCountRef.current
+        ) {
+          if (audioRef.current) {
+            audioRef.current.loop = true;
+            audioRef.current.currentTime = 0;
+
+            audioRef.current.play().catch((err) => {
+              console.log(err);
+            });
+          }
+        }
+
+        lastOrderCountRef.current = firebaseOrders.length;
         setOrders(firebaseOrders);
       });
 
@@ -59,9 +94,34 @@ export default function OwnerDashboard() {
     return () => unsubscribeAuth();
   }, []);
 
+  const stopSound = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+  const enableSound = async () => {
+    if (!audioRef.current) return;
+
+    try {
+      audioRef.current.volume = 1;
+      audioRef.current.loop = false;
+      audioRef.current.currentTime = 0;
+
+      await audioRef.current.play();
+
+      setSoundEnabled(true);
+      soundEnabledRef.current = true;
+
+      alert("Sound enabled successfully");
+    } catch (error) {
+      console.log(error);
+      alert("Browser blocked sound");
+    }
+  };
   const changeOrderStatus = async (
     id: string,
-    status: FirebaseOrder["status"]
+    status: FirebaseOrder["status"],
   ) => {
     await updateFirebaseOrderStatus(id, status);
   };
@@ -73,7 +133,7 @@ export default function OwnerDashboard() {
 
   const toggleItem = (id: string) => {
     const updated = items.map((item) =>
-      item.id === id ? { ...item, available: !item.available } : item
+      item.id === id ? { ...item, available: !item.available } : item,
     );
 
     saveMenu(updated);
@@ -112,6 +172,7 @@ export default function OwnerDashboard() {
   };
 
   const logout = async () => {
+    stopSound();
     await signOut(auth);
     window.location.href = "/owner-login";
   };
@@ -145,114 +206,395 @@ export default function OwnerDashboard() {
     .filter((order) => order.paymentStatus === "Paid")
     .reduce((sum, order) => sum + order.total, 0);
 
-  const OrderCard = ({ order }: { order: FirebaseOrder }) => (
-    <div className="bg-white text-black rounded-[28px] p-6 shadow-2xl">
-      <div className="flex flex-col lg:flex-row lg:justify-between gap-6">
-        <div>
-          <p className="uppercase text-xs font-black tracking-[0.25em] text-orange-500">
-            {order.orderType}
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+
+  const monthlyOrders = orders.filter((order) => {
+    if (!order.createdAt?.toDate) return false;
+
+    const date = order.createdAt.toDate();
+
+    return (
+      date.getMonth() === currentMonth && date.getFullYear() === currentYear
+    );
+  });
+
+  const monthlyRevenue = monthlyOrders
+    .filter((order) => order.paymentStatus === "Paid")
+    .reduce((sum, order) => sum + order.total, 0);
+
+  const filteredOrders = orders.filter((order) => {
+    if (!order.createdAt?.toDate) return false;
+
+    const date = order.createdAt.toDate();
+    const orderDate = date.toISOString().split("T")[0];
+    const orderMonth = String(date.getMonth() + 1).padStart(2, "0");
+    const orderYear = String(date.getFullYear());
+
+    const dateMatch = filterDate ? orderDate === filterDate : true;
+
+    const statusMatch =
+      filterStatus === "All" ? true : order.status === filterStatus;
+
+    const paymentMatch =
+      filterPayment === "All" ? true : order.paymentStatus === filterPayment;
+
+    const monthMatch =
+      filterMonth === "All" ? true : orderMonth === filterMonth;
+
+    const yearMatch = filterYear === "All" ? true : orderYear === filterYear;
+
+    return dateMatch && statusMatch && paymentMatch && monthMatch && yearMatch;
+  });
+
+  const filteredTotal = filteredOrders
+    .filter((order) => order.paymentStatus === "Paid")
+    .reduce((sum, order) => sum + order.total, 0);
+
+  const menuCategories = [
+    "Biryani",
+    "Starters",
+    "Veg Starters",
+    "Curries",
+    "Veg",
+    "Rice & Noodles",
+    "Bread & Meals",
+    "Soups",
+    "Egg",
+    "Desserts",
+    "Beverages",
+  ];
+
+  const visibleMenuItems = items.filter((item) => {
+    const searchMatch = menuSearch.trim()
+      ? item.name.toLowerCase().includes(menuSearch.toLowerCase().trim()) ||
+        item.category.toLowerCase().includes(menuSearch.toLowerCase().trim())
+      : true;
+
+    const categoryMatch = selectedMenuCategory
+      ? item.category === selectedMenuCategory
+      : true;
+
+    if (!menuSearch.trim() && !selectedMenuCategory) return false;
+
+    return searchMatch && categoryMatch;
+  });
+
+  const allVisibleSelected =
+    visibleMenuItems.length > 0 &&
+    visibleMenuItems.every((item) => selectedMenuIds.includes(item.id));
+
+  const toggleSelectMenuItem = (id: string) => {
+    setSelectedMenuIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((selectedId) => selectedId !== id)
+        : [...prev, id],
+    );
+  };
+
+  const toggleSelectAllVisible = () => {
+    if (allVisibleSelected) {
+      setSelectedMenuIds((prev) =>
+        prev.filter(
+          (selectedId) =>
+            !visibleMenuItems.some((item) => item.id === selectedId),
+        ),
+      );
+
+      return;
+    }
+
+    setSelectedMenuIds((prev) => [
+      ...prev,
+      ...visibleMenuItems
+        .filter((item) => !prev.includes(item.id))
+        .map((item) => item.id),
+    ]);
+  };
+
+  const clearMenuSelection = () => {
+    setSelectedMenuIds([]);
+  };
+
+  const bulkUpdateAvailability = (available: boolean) => {
+    if (selectedMenuIds.length === 0) {
+      alert("Select at least one item");
+      return;
+    }
+
+    const updated = items.map((item) =>
+      selectedMenuIds.includes(item.id) ? { ...item, available } : item,
+    );
+
+    saveMenu(updated);
+  };
+
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(20);
+    doc.text("Nikus Andhra Kitchen Report", 14, 20);
+
+    doc.setFontSize(11);
+    doc.text(`Filtered Orders: ${filteredOrders.length}`, 14, 30);
+    doc.text(`Filtered Paid Total: Rs.${filteredTotal.toFixed(2)}`, 14, 38);
+
+    autoTable(doc, {
+      startY: 48,
+      head: [
+        ["Customer", "Phone", "Table", "Status", "Payment", "Total", "Date"],
+      ],
+      body: filteredOrders.map((order) => [
+        order.customer,
+        order.phone,
+        order.tableId,
+        order.status,
+        order.paymentStatus,
+        `Rs.${order.total.toFixed(2)}`,
+        order.createdAt?.toDate
+          ? order.createdAt.toDate().toLocaleString("en-IN")
+          : "",
+      ]),
+    });
+
+    doc.save("nikus-report.pdf");
+  };
+
+  const OrderCard = ({ order }: { order: FirebaseOrder }) => {
+    const printBill = () => {
+      stopSound();
+
+      const printWindow = window.open("", "_blank");
+
+      if (!printWindow) return;
+
+      printWindow.document.write(`
+      <html>
+        <head>
+          <title>Nikus Andhra Kitchen Bill</title>
+
+          <style>
+            body {
+              font-family: Arial;
+              padding: 20px;
+            }
+
+            h1 {
+              text-align: center;
+              margin-bottom: 10px;
+            }
+
+            h2 {
+              margin-top: 25px;
+            }
+
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+
+            th, td {
+              border: 1px solid black;
+              padding: 10px;
+              text-align: left;
+            }
+
+            .total {
+              font-size: 24px;
+              font-weight: bold;
+              margin-top: 20px;
+            }
+          </style>
+        </head>
+
+        <body>
+          <h1>Nikus Andhra Kitchen</h1>
+
+          <p><strong>Customer:</strong> ${order.customer}</p>
+
+          <p><strong>Phone:</strong> ${order.phone}</p>
+
+          <p><strong>Table:</strong> ${order.tableId}</p>
+
+          <p><strong>Status:</strong> ${order.status}</p>
+
+          <p><strong>Payment:</strong> ${order.payment}</p>
+
+          <p><strong>Date:</strong>
+            ${
+              order.createdAt?.toDate
+                ? order.createdAt.toDate().toLocaleString("en-IN")
+                : "Just now"
+            }
           </p>
 
-          <h3 className="text-3xl font-black mt-2">{order.customer}</h3>
+          <h2>Items</h2>
 
-          <p className="text-lg mt-2 font-bold">Mobile: {order.phone}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Items</th>
+              </tr>
+            </thead>
 
-          <p className="text-lg mt-2 font-bold">Table: {order.tableId}</p>
+            <tbody>
+              ${order.items
+                .map(
+                  (item) => `
+                    <tr>
+                      <td>${item}</td>
+                    </tr>
+                  `,
+                )
+                .join("")}
+            </tbody>
+          </table>
 
-          <p className="text-gray-600 mt-2">
-            Date:{" "}
-            {order.createdAt?.toDate
-              ? order.createdAt.toDate().toLocaleString("en-IN")
-              : "Just now"}
+          <p>Subtotal: ₹${order.subtotal.toFixed(2)}</p>
+
+          <p>GST: ₹${order.gst.toFixed(2)}</p>
+
+          ${
+            order.packingCharge > 0
+              ? `<p>Container: ₹${order.packingCharge.toFixed(2)}</p>`
+              : ""
+          }
+
+          <p class="total">
+            Total: ₹${order.total.toFixed(2)}
           </p>
 
-          <div className="mt-5">
-            <p className="font-black text-lg">Items</p>
+          <script>
+            window.onload = () => {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
 
-            <ul className="list-disc ml-6 mt-2 text-gray-700">
-              {order.items.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
+      printWindow.document.close();
+    };
+
+    return (
+      <div className="bg-white text-black rounded-[28px] p-6 shadow-2xl">
+        <div className="flex flex-col lg:flex-row lg:justify-between gap-6">
+          <div>
+            <p className="uppercase text-xs font-black tracking-[0.25em] text-orange-500">
+              {order.orderType}
+            </p>
+
+            <h3 className="text-3xl font-black mt-2">{order.customer}</h3>
+
+            <p className="text-lg mt-2 font-bold">Mobile: {order.phone}</p>
+
+            <p className="text-lg mt-2 font-bold">Table: {order.tableId}</p>
+
+            <p className="text-gray-600 mt-2">
+              Date:{" "}
+              {order.createdAt?.toDate
+                ? order.createdAt.toDate().toLocaleString("en-IN")
+                : "Just now"}
+            </p>
+
+            <div className="mt-5">
+              <p className="font-black text-lg">Items</p>
+
+              <ul className="list-disc ml-6 mt-2 text-gray-700">
+                {order.items.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </div>
           </div>
-        </div>
 
-        <div className="min-w-[250px]">
-          <div
-            className={`px-5 py-3 rounded-full text-center font-black ${
-              order.status === "Pending"
-                ? "bg-yellow-400 text-black"
-                : order.status === "Accepted"
-                ? "bg-blue-500 text-white"
-                : order.status === "Rejected"
-                ? "bg-red-500 text-white"
-                : order.status === "Preparing"
-                ? "bg-orange-500 text-black"
-                : "bg-green-500 text-white"
-            }`}
-          >
-            {order.status}
-          </div>
+          <div className="min-w-[250px]">
+            <div
+              className={`px-5 py-3 rounded-full text-center font-black ${
+                order.status === "Pending"
+                  ? "bg-yellow-400 text-black"
+                  : order.status === "Accepted"
+                    ? "bg-blue-500 text-white"
+                    : order.status === "Rejected"
+                      ? "bg-red-500 text-white"
+                      : order.status === "Preparing"
+                        ? "bg-orange-500 text-black"
+                        : "bg-green-500 text-white"
+              }`}
+            >
+              {order.status}
+            </div>
 
-          <div className="mt-6 space-y-2 text-lg">
-            <p>Subtotal: ₹{order.subtotal.toFixed(2)}</p>
-            <p>GST: ₹{order.gst.toFixed(2)}</p>
+            <div className="mt-6 space-y-2 text-lg">
+              <p>Subtotal: ₹{order.subtotal.toFixed(2)}</p>
 
-            {order.packingCharge > 0 && (
-              <p>Container: ₹{order.packingCharge.toFixed(2)}</p>
-            )}
+              <p>GST: ₹{order.gst.toFixed(2)}</p>
 
-            <p className="font-black">Payment: {order.payment}</p>
+              {order.packingCharge > 0 && (
+                <p>Container: ₹{order.packingCharge.toFixed(2)}</p>
+              )}
 
-            <p className="font-black">Payment Status: {order.paymentStatus}</p>
+              <p className="font-black">Payment: {order.payment}</p>
 
-            <h2 className="text-4xl font-black text-orange-500">
-              ₹{order.total.toFixed(2)}
-            </h2>
-          </div>
+              <p className="font-black">
+                Payment Status: {order.paymentStatus}
+              </p>
 
-          <div className="flex flex-wrap gap-3 mt-6">
-            {order.status === "Pending" && order.id && (
-              <>
-                <button
-                  onClick={() => changeOrderStatus(order.id!, "Accepted")}
-                  className="bg-green-500 text-white px-5 py-3 rounded-xl font-black"
-                >
-                  Accept
-                </button>
+              <h2 className="text-4xl font-black text-orange-500">
+                ₹{order.total.toFixed(2)}
+              </h2>
+            </div>
 
-                <button
-                  onClick={() => changeOrderStatus(order.id!, "Rejected")}
-                  className="bg-red-500 text-white px-5 py-3 rounded-xl font-black"
-                >
-                  Reject
-                </button>
-              </>
-            )}
-
-            {order.status === "Accepted" && order.id && (
+            <div className="flex flex-wrap gap-3 mt-6">
               <button
-                onClick={() => changeOrderStatus(order.id!, "Preparing")}
-                className="bg-orange-500 text-black px-5 py-3 rounded-xl font-black"
-              >
-                Preparing
-              </button>
-            )}
-
-            {order.status === "Preparing" && order.id && (
-              <button
-                onClick={() => changeOrderStatus(order.id!, "Served")}
+                onClick={printBill}
                 className="bg-black text-white px-5 py-3 rounded-xl font-black"
               >
-                Served
+                Print Bill
               </button>
-            )}
+
+              {order.status === "Pending" && order.id && (
+                <>
+                  <button
+                    onClick={() => changeOrderStatus(order.id!, "Accepted")}
+                    className="bg-green-500 text-white px-5 py-3 rounded-xl font-black"
+                  >
+                    Accept
+                  </button>
+
+                  <button
+                    onClick={() => changeOrderStatus(order.id!, "Rejected")}
+                    className="bg-red-500 text-white px-5 py-3 rounded-xl font-black"
+                  >
+                    Reject
+                  </button>
+                </>
+              )}
+
+              {order.status === "Accepted" && order.id && (
+                <button
+                  onClick={() => changeOrderStatus(order.id!, "Preparing")}
+                  className="bg-orange-500 text-black px-5 py-3 rounded-xl font-black"
+                >
+                  Preparing
+                </button>
+              )}
+
+              {order.status === "Preparing" && order.id && (
+                <button
+                  onClick={() => changeOrderStatus(order.id!, "Served")}
+                  className="bg-black text-white px-5 py-3 rounded-xl font-black"
+                >
+                  Served
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-
+    );
+  };
   return (
     <main className="min-h-screen bg-black text-white p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl mx-auto">
@@ -274,6 +616,12 @@ export default function OwnerDashboard() {
             >
               Table QR Codes
             </a>
+            <button
+              onClick={enableSound}
+              className="bg-green-500 text-white px-6 sm:px-8 py-4 rounded-2xl font-black"
+            >
+              Enable Sound
+            </button>
 
             <button
               onClick={logout}
@@ -311,17 +659,158 @@ export default function OwnerDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
           <div className="bg-orange-500 text-black p-6 rounded-[28px]">
             <h2 className="text-4xl font-black">{todaysOrders.length}</h2>
             <p className="font-bold mt-2">Today Orders</p>
           </div>
 
           <div className="bg-white text-black p-6 rounded-[28px]">
-            <h2 className="text-4xl font-black">
-              ₹{todaysRevenue.toFixed(0)}
-            </h2>
+            <h2 className="text-4xl font-black">₹{todaysRevenue.toFixed(0)}</h2>
             <p className="font-bold mt-2">Today Payments</p>
+          </div>
+
+          <div className="bg-orange-500 text-black p-6 rounded-[28px]">
+            <h2 className="text-4xl font-black">{monthlyOrders.length}</h2>
+            <p className="font-bold mt-2">This Month Orders</p>
+          </div>
+
+          <div className="bg-white text-black p-6 rounded-[28px]">
+            <h2 className="text-4xl font-black">
+              ₹{monthlyRevenue.toFixed(0)}
+            </h2>
+            <p className="font-bold mt-2">This Month Payments</p>
+          </div>
+        </div>
+
+        <div className="bg-white text-black rounded-[35px] p-6 md:p-8 mt-14">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-black">
+                Reports & PDF Download
+              </h2>
+
+              <p className="font-bold mt-2">
+                Filtered Orders: {filteredOrders.length}
+              </p>
+
+              <p className="font-bold mt-1">
+                Filtered Total: ₹{filteredTotal.toFixed(2)}
+              </p>
+            </div>
+
+            <button
+              onClick={downloadPDF}
+              className="bg-orange-500 text-black px-6 py-4 rounded-2xl font-black"
+            >
+              Download PDF
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mt-8">
+            <input
+              type="date"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="border-2 border-black p-4 rounded-2xl font-bold"
+            />
+
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="border-2 border-black p-4 rounded-2xl font-bold"
+            >
+              <option>All</option>
+              <option>Pending</option>
+              <option>Accepted</option>
+              <option>Preparing</option>
+              <option>Served</option>
+              <option>Rejected</option>
+            </select>
+
+            <select
+              value={filterPayment}
+              onChange={(e) => setFilterPayment(e.target.value)}
+              className="border-2 border-black p-4 rounded-2xl font-bold"
+            >
+              <option>All</option>
+              <option>Paid</option>
+              <option>Cash Pending</option>
+            </select>
+
+            <select
+              value={filterMonth}
+              onChange={(e) => setFilterMonth(e.target.value)}
+              className="border-2 border-black p-4 rounded-2xl font-bold"
+            >
+              <option value="All">All Months</option>
+              <option value="01">January</option>
+              <option value="02">February</option>
+              <option value="03">March</option>
+              <option value="04">April</option>
+              <option value="05">May</option>
+              <option value="06">June</option>
+              <option value="07">July</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+
+            <select
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              className="border-2 border-black p-4 rounded-2xl font-bold"
+            >
+              <option value="All">All Years</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+            </select>
+          </div>
+
+          <div className="overflow-x-auto mt-10">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-black text-white">
+                  <th className="p-4 text-left">Customer</th>
+                  <th className="p-4 text-left">Phone</th>
+                  <th className="p-4 text-left">Table</th>
+                  <th className="p-4 text-left">Status</th>
+                  <th className="p-4 text-left">Payment</th>
+                  <th className="p-4 text-left">Total</th>
+                  <th className="p-4 text-left">Date</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredOrders.length === 0 ? (
+                  <tr>
+                    <td className="p-4 font-bold" colSpan={7}>
+                      No report data found
+                    </td>
+                  </tr>
+                ) : (
+                  filteredOrders.map((order) => (
+                    <tr key={order.id} className="border-b border-gray-300">
+                      <td className="p-4 font-bold">{order.customer}</td>
+                      <td className="p-4">{order.phone}</td>
+                      <td className="p-4">{order.tableId}</td>
+                      <td className="p-4">{order.status}</td>
+                      <td className="p-4">{order.paymentStatus}</td>
+                      <td className="p-4 font-black">₹{order.total}</td>
+                      <td className="p-4">
+                        {order.createdAt?.toDate
+                          ? order.createdAt.toDate().toLocaleString("en-IN")
+                          : ""}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -407,90 +896,222 @@ export default function OwnerDashboard() {
         </div>
 
         <div className="mt-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black">
-            Manage Menu Items
-          </h2>
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black">
+                Manage Menu Items
+              </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-10">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white text-black rounded-[30px] overflow-hidden shadow-2xl"
+              <p className="text-orange-200 font-bold mt-3">
+                Search or select a category to show items. No items show by
+                default.
+              </p>
+            </div>
+
+            <div className="bg-white text-black rounded-[24px] p-5 min-w-full lg:min-w-[320px]">
+              <p className="font-black">Selected Items</p>
+
+              <h3 className="text-4xl font-black text-orange-500 mt-2">
+                {selectedMenuIds.length}
+              </h3>
+            </div>
+          </div>
+
+          <div className="bg-white text-black rounded-[35px] p-5 sm:p-7 md:p-8 mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+              <input
+                type="text"
+                placeholder="Search item name or category"
+                value={menuSearch}
+                onChange={(e) => {
+                  setMenuSearch(e.target.value);
+                  setSelectedMenuIds([]);
+                }}
+                className="lg:col-span-2 border-2 border-black p-4 rounded-2xl font-bold outline-none"
+              />
+
+              <button
+                onClick={toggleSelectAllVisible}
+                disabled={visibleMenuItems.length === 0}
+                className="bg-black text-white px-5 py-4 rounded-2xl font-black disabled:opacity-40"
               >
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-56 object-cover"
-                />
+                {allVisibleSelected ? "Unselect All" : "Select All"}
+              </button>
 
-                <div className="p-6">
-                  <h3 className="text-2xl font-black leading-tight">
-                    {item.name}
-                  </h3>
+              <button
+                onClick={clearMenuSelection}
+                className="bg-gray-200 text-black px-5 py-4 rounded-2xl font-black"
+              >
+                Clear Selection
+              </button>
+            </div>
 
-                  <p className="text-lg font-bold mt-3">₹{item.price}</p>
+            <div className="flex flex-wrap gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setSelectedMenuCategory("");
+                  setSelectedMenuIds([]);
+                }}
+                className={`px-5 py-3 rounded-full font-black ${
+                  selectedMenuCategory === ""
+                    ? "bg-orange-500 text-black"
+                    : "bg-black text-white"
+                }`}
+              >
+                All Categories
+              </button>
 
-                  <p className="text-gray-600 font-bold mt-2">
-                    {item.category}
-                  </p>
+              {menuCategories.map((menuCategory) => (
+                <button
+                  key={menuCategory}
+                  onClick={() => {
+                    setSelectedMenuCategory(menuCategory);
+                    setSelectedMenuIds([]);
+                  }}
+                  className={`px-5 py-3 rounded-full font-black ${
+                    selectedMenuCategory === menuCategory
+                      ? "bg-orange-500 text-black"
+                      : "bg-black text-white"
+                  }`}
+                >
+                  {menuCategory}
+                </button>
+              ))}
+            </div>
 
-                  <div className="flex flex-wrap gap-3 mt-6">
-                    <button
-                      onClick={() => toggleItem(item.id)}
-                      className={`px-5 py-3 rounded-xl font-black text-sm ${
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-7">
+              <button
+                onClick={() => bulkUpdateAvailability(true)}
+                className="bg-green-500 text-white px-6 py-4 rounded-2xl font-black"
+              >
+                Selected ON
+              </button>
+
+              <button
+                onClick={() => bulkUpdateAvailability(false)}
+                className="bg-red-500 text-white px-6 py-4 rounded-2xl font-black"
+              >
+                Selected OFF
+              </button>
+
+              <p className="bg-orange-100 text-black px-6 py-4 rounded-2xl font-black text-center">
+                Showing: {visibleMenuItems.length}
+              </p>
+            </div>
+          </div>
+
+          {visibleMenuItems.length === 0 ? (
+            <div className="bg-white text-black p-8 rounded-[30px] mt-10 text-xl font-black">
+              Search item name or click a category to view menu items.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-10">
+              {visibleMenuItems.map((item) => (
+                <div
+                  key={item.id}
+                  className={`bg-white text-black rounded-[30px] overflow-hidden shadow-2xl border-4 ${
+                    selectedMenuIds.includes(item.id)
+                      ? "border-orange-500"
+                      : "border-transparent"
+                  }`}
+                >
+                  <div className="relative">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-56 object-cover"
+                    />
+
+                    <label className="absolute top-4 left-4 bg-black text-white px-4 py-3 rounded-2xl font-black flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedMenuIds.includes(item.id)}
+                        onChange={() => toggleSelectMenuItem(item.id)}
+                        className="w-5 h-5"
+                      />
+                      Select
+                    </label>
+
+                    <div
+                      className={`absolute top-4 right-4 px-4 py-3 rounded-2xl font-black ${
                         item.available
                           ? "bg-green-500 text-white"
                           : "bg-red-500 text-white"
                       }`}
                     >
                       {item.available ? "ON" : "OFF"}
-                    </button>
+                    </div>
+                  </div>
 
-                    <button
-                      onClick={() => {
-                        const newName = prompt("Edit Item Name", item.name);
-                        const newPrice = prompt(
-                          "Edit Price",
-                          item.price.toString()
-                        );
-                        const newCategory = prompt(
-                          "Edit Category",
-                          item.category
-                        );
-                        const newImage = prompt("Edit Image URL", item.image);
+                  <div className="p-6">
+                    <h3 className="text-2xl font-black leading-tight">
+                      {item.name}
+                    </h3>
 
-                        if (!newName || !newPrice || !newCategory) return;
+                    <p className="text-lg font-bold mt-3">₹{item.price}</p>
 
-                        const updated = items.map((menuItem) =>
-                          menuItem.id === item.id
-                            ? {
-                                ...menuItem,
-                                name: newName,
-                                price: Number(newPrice),
-                                category: newCategory,
-                                image: newImage || item.image,
-                              }
-                            : menuItem
-                        );
+                    <p className="text-gray-600 font-bold mt-2">
+                      {item.category}
+                    </p>
 
-                        saveMenu(updated);
-                      }}
-                      className="bg-orange-500 text-black px-5 py-3 rounded-xl font-black text-sm"
-                    >
-                      Edit
-                    </button>
+                    <div className="flex flex-wrap gap-3 mt-6">
+                      <button
+                        onClick={() => toggleItem(item.id)}
+                        className={`px-5 py-3 rounded-xl font-black text-sm ${
+                          item.available
+                            ? "bg-green-500 text-white"
+                            : "bg-red-500 text-white"
+                        }`}
+                      >
+                        {item.available ? "ON" : "OFF"}
+                      </button>
 
-                    <button
-                      onClick={() => deleteItem(item.id)}
-                      className="bg-black text-white px-5 py-3 rounded-xl font-black text-sm"
-                    >
-                      Delete
-                    </button>
+                      <button
+                        onClick={() => {
+                          const newName = prompt("Edit Item Name", item.name);
+                          const newPrice = prompt(
+                            "Edit Price",
+                            item.price.toString(),
+                          );
+                          const newCategory = prompt(
+                            "Edit Category",
+                            item.category,
+                          );
+                          const newImage = prompt("Edit Image URL", item.image);
+
+                          if (!newName || !newPrice || !newCategory) return;
+
+                          const updated = items.map((menuItem) =>
+                            menuItem.id === item.id
+                              ? {
+                                  ...menuItem,
+                                  name: newName,
+                                  price: Number(newPrice),
+                                  category: newCategory,
+                                  image: newImage || item.image,
+                                }
+                              : menuItem,
+                          );
+
+                          saveMenu(updated);
+                        }}
+                        className="bg-orange-500 text-black px-5 py-3 rounded-xl font-black text-sm"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => deleteItem(item.id)}
+                        className="bg-black text-white px-5 py-3 rounded-xl font-black text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </main>
