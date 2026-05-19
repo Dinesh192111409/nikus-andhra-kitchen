@@ -28,12 +28,11 @@ const createReservationOrderId = (prefix: string) =>
 
 export default function Reservation() {
   const [items] = useState<MenuItem[]>(() => getActiveMenuItems());
-
   const tables = [1, 2, 3, 4, 5, 6, 7];
 
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [selectedBookedTable, setSelectedBookedTable] = useState<number | null>(
-    null
+    null,
   );
 
   const [showBooking, setShowBooking] = useState(false);
@@ -59,7 +58,7 @@ export default function Reservation() {
   const [bookedTables, setBookedTables] = useState<Booking[]>([]);
 
   const selectedBooking = bookedTables.find(
-    (table) => table.table === selectedBookedTable
+    (table) => table.table === selectedBookedTable,
   );
 
   const subtotal = items.reduce((total, item) => {
@@ -75,7 +74,7 @@ export default function Reservation() {
     .map((item) => `${item.name} x ${cart[item.name]}`);
 
   const upiLink = `upi://pay?pa=nikusandhrakitchen@upi&pn=Nikus%20Andhra%20Kitchen&am=${total.toFixed(
-    2
+    2,
   )}&cu=INR`;
 
   const reserveTable = () => {
@@ -181,7 +180,7 @@ export default function Reservation() {
     ]);
 
     setBookedTables((prev) =>
-      prev.filter((table) => table.table !== selectedBookedTable)
+      prev.filter((table) => table.table !== selectedBookedTable),
     );
 
     setSelectedBookedTable(null);
@@ -204,31 +203,31 @@ export default function Reservation() {
   return (
     <section
       id="reservation"
-      className="bg-black text-white py-16 sm:py-20 md:py-24 px-4 sm:px-6 overflow-hidden"
+      className="bg-black text-white w-full overflow-x-hidden py-16 sm:py-20 md:py-24 px-3 sm:px-6"
     >
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-14 md:mb-20">
-          <p className="text-orange-400 uppercase tracking-[0.25em] sm:tracking-[0.35em] font-black text-xs sm:text-sm">
+      <div className="w-full max-w-7xl mx-auto">
+        <div className="text-center mb-12 md:mb-20">
+          <p className="text-orange-400 uppercase tracking-[0.18em] sm:tracking-[0.35em] font-black text-[10px] sm:text-sm">
             Restaurant POS Table Service
           </p>
 
-          <h2 className="text-4xl sm:text-5xl md:text-7xl font-black mt-6 leading-tight">
+          <h2 className="text-3xl sm:text-5xl md:text-7xl font-black mt-6 leading-tight break-words">
             DINE-IN TABLE ORDERING
           </h2>
 
-          <p className="text-gray-300 mt-5 text-base sm:text-lg font-semibold">
+          <p className="text-gray-300 mt-5 text-sm sm:text-base md:text-lg font-semibold">
             Reserve table, add food, generate KOT, collect payment and close
             table.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 md:gap-16">
-          <div className="bg-white text-black p-5 sm:p-7 md:p-10 rounded-[28px] md:rounded-[40px] shadow-2xl">
-            <h3 className="text-3xl md:text-4xl font-black mb-8 md:mb-10">
+        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-8 md:gap-12 xl:gap-16 items-start">
+          <div className="bg-white text-black p-4 sm:p-7 md:p-10 rounded-[28px] md:rounded-[40px] shadow-2xl overflow-hidden">
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-black mb-8 md:mb-10">
               Select Table
             </h3>
 
-            <div className="grid grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-4 sm:gap-6">
               {tables.map((table) => {
                 const booking = bookedTables.find((t) => t.table === table);
 
@@ -251,12 +250,12 @@ export default function Reservation() {
                         setShowBill(false);
                       }
                     }}
-                    className={`p-5 sm:p-6 md:p-8 rounded-3xl text-lg sm:text-xl md:text-2xl font-black transition ${
+                    className={`p-5 sm:p-6 md:p-8 rounded-3xl text-base sm:text-xl md:text-2xl font-black transition break-words ${
                       booking
                         ? "bg-green-500 text-white"
                         : selectedTable === table
-                        ? "bg-orange-500 text-black"
-                        : "bg-gray-200 hover:bg-orange-300"
+                          ? "bg-orange-500 text-black"
+                          : "bg-gray-200 hover:bg-orange-300"
                     }`}
                   >
                     Table {table}
@@ -271,8 +270,8 @@ export default function Reservation() {
           </div>
 
           {showBooking && (
-            <div className="bg-orange-500 text-black p-5 sm:p-7 md:p-10 rounded-[28px] md:rounded-[40px] shadow-2xl">
-              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black">
+            <div className="bg-orange-500 text-black p-4 sm:p-7 md:p-10 rounded-[28px] md:rounded-[40px] shadow-2xl overflow-hidden">
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black break-words">
                 Reservation Details
               </h3>
 
@@ -281,7 +280,7 @@ export default function Reservation() {
                   setShowBooking(false);
                   setSelectedTable(null);
                 }}
-                className="mt-6 bg-black text-white px-6 py-3 rounded-xl font-bold"
+                className="mt-6 bg-black text-white px-6 py-3 rounded-xl font-bold w-full sm:w-auto"
               >
                 ← Back To Tables
               </button>
@@ -321,7 +320,7 @@ export default function Reservation() {
                   <select
                     value={period}
                     onChange={(e) => setPeriod(e.target.value)}
-                    className="p-4 md:p-5 rounded-2xl text-base sm:text-lg md:text-xl outline-none"
+                    className="w-full sm:w-auto p-4 md:p-5 rounded-2xl text-base sm:text-lg md:text-xl outline-none"
                   >
                     <option>AM</option>
                     <option>PM</option>
@@ -330,7 +329,7 @@ export default function Reservation() {
 
                 <button
                   onClick={reserveTable}
-                  className="w-full bg-black text-white py-4 md:py-5 rounded-2xl text-xl md:text-2xl font-black"
+                  className="w-full bg-black text-white py-4 md:py-5 rounded-2xl text-lg md:text-2xl font-black"
                 >
                   Reserve Table
                 </button>
@@ -339,18 +338,18 @@ export default function Reservation() {
           )}
 
           {selectedBooking && showMenu && (
-            <div className="bg-green-500 text-black p-5 sm:p-7 md:p-10 rounded-[28px] md:rounded-[40px] shadow-2xl">
-              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black">
+            <div className="bg-green-500 text-black p-4 sm:p-7 md:p-10 rounded-[28px] md:rounded-[40px] shadow-2xl overflow-hidden">
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black break-words">
                 Table {selectedBooking.table}
               </h3>
 
-              <div className="bg-white p-5 rounded-2xl mt-6">
-                <p className="font-black text-xl">
+              <div className="bg-white p-4 sm:p-5 rounded-2xl mt-6 overflow-hidden break-words">
+                <p className="font-black text-lg sm:text-xl">
                   Customer: {selectedBooking.name}
                 </p>
-                <p className="font-bold mt-2">
-                  Phone: {selectedBooking.phone}
-                </p>
+
+                <p className="font-bold mt-2">Phone: {selectedBooking.phone}</p>
+
                 <p className="font-bold mt-2">
                   Time: {selectedBooking.date}, {selectedBooking.time}{" "}
                   {selectedBooking.period}
@@ -363,7 +362,7 @@ export default function Reservation() {
                     setShowKOT(false);
                     setShowBill(false);
                   }}
-                  className="bg-black text-white px-6 py-4 rounded-2xl font-black"
+                  className="bg-black text-white px-6 py-4 rounded-2xl font-black w-full sm:w-auto"
                 >
                   Menu
                 </button>
@@ -378,7 +377,7 @@ export default function Reservation() {
                     setShowKOT(true);
                     setShowBill(false);
                   }}
-                  className="bg-white text-black px-6 py-4 rounded-2xl font-black"
+                  className="bg-white text-black px-6 py-4 rounded-2xl font-black w-full sm:w-auto"
                 >
                   Show KOT
                 </button>
@@ -393,7 +392,7 @@ export default function Reservation() {
                     setShowBill(true);
                     setShowKOT(false);
                   }}
-                  className="bg-orange-500 text-black px-6 py-4 rounded-2xl font-black"
+                  className="bg-orange-500 text-black px-6 py-4 rounded-2xl font-black w-full sm:w-auto"
                 >
                   Pay Bill
                 </button>
@@ -404,24 +403,25 @@ export default function Reservation() {
                   {items.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-white p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-5"
+                      className="bg-white p-4 sm:p-5 rounded-2xl flex flex-col lg:flex-row justify-between lg:items-center gap-5 overflow-hidden"
                     >
-                      <div>
-                        <p className="text-lg sm:text-xl font-black">
+                      <div className="min-w-0">
+                        <p className="text-base sm:text-xl font-black break-words">
                           {item.name}
                         </p>
+
                         <p className="text-base sm:text-lg">₹{item.price}</p>
                       </div>
 
                       {(cart[item.name] || 0) === 0 ? (
                         <button
                           onClick={() => addItem(item.name)}
-                          className="bg-black text-white px-5 py-3 rounded-xl font-bold w-full sm:w-auto"
+                          className="bg-black text-white px-5 py-3 rounded-xl font-bold w-full lg:w-auto"
                         >
                           ADD +
                         </button>
                       ) : (
-                        <div className="flex items-center justify-center gap-4 bg-black text-white px-5 py-3 rounded-xl w-full sm:w-auto">
+                        <div className="flex items-center justify-center gap-4 bg-black text-white px-5 py-3 rounded-xl w-full lg:w-auto">
                           <button
                             onClick={() => removeItem(item.name)}
                             className="text-2xl font-bold"
@@ -447,8 +447,8 @@ export default function Reservation() {
               )}
 
               {showKOT && (
-                <div className="bg-white text-black p-6 rounded-3xl mt-8">
-                  <h3 className="text-4xl font-black">KOT</h3>
+                <div className="bg-white text-black p-4 sm:p-6 rounded-3xl mt-8 overflow-hidden">
+                  <h3 className="text-3xl sm:text-4xl font-black">KOT</h3>
 
                   <p className="font-bold mt-3">
                     Table: {selectedBooking.table}
@@ -464,14 +464,15 @@ export default function Reservation() {
                         cart[item.name] > 0 && (
                           <div
                             key={item.id}
-                            className="flex justify-between text-lg font-bold"
+                            className="flex flex-wrap justify-between gap-3 text-base sm:text-lg font-bold"
                           >
-                            <span>
+                            <span className="break-words">
                               {item.name} x {cart[item.name]}
                             </span>
+
                             <span>Qty: {cart[item.name]}</span>
                           </div>
-                        )
+                        ),
                     )}
                   </div>
 
@@ -485,8 +486,10 @@ export default function Reservation() {
               )}
 
               {showBill && (
-                <div className="bg-white text-black p-6 rounded-3xl mt-8">
-                  <h3 className="text-4xl font-black">Bill Summary</h3>
+                <div className="bg-white text-black p-4 sm:p-6 rounded-3xl mt-8 overflow-hidden">
+                  <h3 className="text-3xl sm:text-4xl font-black">
+                    Bill Summary
+                  </h3>
 
                   <div className="mt-6 space-y-3">
                     {items.map(
@@ -494,35 +497,38 @@ export default function Reservation() {
                         cart[item.name] > 0 && (
                           <div
                             key={item.id}
-                            className="flex justify-between text-lg"
+                            className="flex flex-wrap justify-between gap-3 text-base sm:text-lg"
                           >
-                            <span>
+                            <span className="break-words">
                               {item.name} x {cart[item.name]}
                             </span>
+
                             <span>₹{item.price * cart[item.name]}</span>
                           </div>
-                        )
+                        ),
                     )}
                   </div>
 
-                  <div className="border-t border-black/20 mt-6 pt-6 space-y-3 text-xl">
-                    <div className="flex justify-between">
+                  <div className="border-t border-black/20 mt-6 pt-6 space-y-3 text-base sm:text-xl">
+                    <div className="flex flex-wrap justify-between gap-3">
                       <span>Subtotal</span>
                       <span>₹{subtotal.toFixed(2)}</span>
                     </div>
 
-                    <div className="flex justify-between">
+                    <div className="flex flex-wrap justify-between gap-3">
                       <span>GST 5%</span>
                       <span>₹{gst.toFixed(2)}</span>
                     </div>
 
-                    <div className="flex justify-between text-3xl font-black text-orange-500">
+                    <div className="flex flex-wrap justify-between gap-3 text-2xl sm:text-3xl font-black text-orange-500">
                       <span>Total</span>
                       <span>₹{total.toFixed(2)}</span>
                     </div>
                   </div>
 
-                  <h4 className="text-2xl font-black mt-8">Payment</h4>
+                  <h4 className="text-xl sm:text-2xl font-black mt-8">
+                    Payment
+                  </h4>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5">
                     {["UPI", "GPay", "PhonePe", "Cash"].map((method) => (
@@ -530,10 +536,10 @@ export default function Reservation() {
                         key={method}
                         onClick={() =>
                           setPaymentMode(
-                            method as "UPI" | "GPay" | "PhonePe" | "Cash"
+                            method as "UPI" | "GPay" | "PhonePe" | "Cash",
                           )
                         }
-                        className={`py-4 rounded-xl font-black ${
+                        className={`py-4 rounded-xl font-black text-sm sm:text-base ${
                           paymentMode === method
                             ? "bg-orange-500 text-black"
                             : "bg-black text-white"
@@ -548,12 +554,12 @@ export default function Reservation() {
                     <div className="mt-8 text-center">
                       <Image
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(
-                          upiLink
+                          upiLink,
                         )}`}
                         alt="UPI QR Code"
                         width={260}
                         height={260}
-                        className="mx-auto rounded-2xl border-4 border-black w-[220px] sm:w-[260px]"
+                        className="mx-auto rounded-2xl border-4 border-black w-full max-w-[260px] h-auto"
                       />
 
                       <a
@@ -571,14 +577,14 @@ export default function Reservation() {
                       </button>
 
                       {paymentDone && (
-                        <p className="mt-5 text-green-700 text-2xl font-black">
+                        <p className="mt-5 text-green-700 text-xl sm:text-2xl font-black">
                           Payment Successful ✓ Table closing...
                         </p>
                       )}
                     </div>
                   ) : (
                     <div className="mt-8">
-                      <p className="text-xl font-black">
+                      <p className="text-lg sm:text-xl font-black">
                         Cash selected. Collect payment manually.
                       </p>
 
@@ -599,44 +605,44 @@ export default function Reservation() {
         <div className="mt-16 md:mt-24 text-center">
           <button
             onClick={() => setShowClosedDining(!showClosedDining)}
-            className="bg-white text-black px-8 md:px-10 py-4 md:py-5 rounded-3xl text-xl md:text-2xl font-black shadow-2xl hover:scale-105 transition"
+            className="bg-white text-black px-6 sm:px-8 md:px-10 py-4 md:py-5 rounded-3xl text-lg md:text-2xl font-black shadow-2xl hover:scale-105 transition w-full sm:w-auto"
           >
             Closed Dining History
           </button>
         </div>
 
         {showClosedDining && (
-          <div className="mt-10 bg-white text-black p-5 sm:p-7 md:p-10 rounded-[28px] md:rounded-[40px]">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-8 md:mb-10">
+          <div className="mt-10 bg-white text-black p-4 sm:p-7 md:p-10 rounded-[28px] md:rounded-[40px] overflow-hidden">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-8 md:mb-10 break-words">
               Closed Dining History
             </h2>
 
             {closedDining.length === 0 ? (
-              <p className="text-xl md:text-2xl">No Closed Tables Yet</p>
+              <p className="text-lg md:text-2xl">No Closed Tables Yet</p>
             ) : (
               <div className="space-y-6">
                 {closedDining.map((table, index) => (
                   <div
                     key={index}
-                    className="bg-gray-100 p-5 md:p-6 rounded-3xl"
+                    className="bg-gray-100 p-5 md:p-6 rounded-3xl overflow-hidden break-words"
                   >
                     <h3 className="text-2xl md:text-3xl font-black">
                       Table {table.table}
                     </h3>
 
-                    <p className="text-lg md:text-xl mt-2">
+                    <p className="text-base md:text-xl mt-2">
                       Customer: {table.name}
                     </p>
 
-                    <p className="text-lg md:text-xl">
+                    <p className="text-base md:text-xl">
                       Payment: {table.payment}
                     </p>
 
-                    <p className="text-lg md:text-xl">
+                    <p className="text-base md:text-xl">
                       Total: ₹{table.total.toFixed(2)}
                     </p>
 
-                    <div className="bg-green-500 text-white px-6 py-4 rounded-2xl text-lg md:text-xl font-black mt-5 inline-block">
+                    <div className="bg-green-500 text-white px-6 py-4 rounded-2xl text-base md:text-xl font-black mt-5 inline-block">
                       Dining Closed ✓
                     </div>
                   </div>

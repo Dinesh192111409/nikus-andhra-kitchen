@@ -40,10 +40,11 @@ export default function OwnerDashboard() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastOrderCountRef = useRef(0);
   const soundEnabledRef = useRef(false);
+  const knownOrderIdsRef = useRef<Set<string>>(new Set());
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("Biryani");
+  const [category, setCategory] = useState("Main Course");
   const [image, setImage] = useState("");
 
   const [filterDate, setFilterDate] = useState("");
@@ -58,8 +59,11 @@ export default function OwnerDashboard() {
   useEffect(() => {
     setMounted(true);
 
-    audioRef.current = new Audio("/order-alert.mp3");
-    audioRef.current.loop = true;
+    if (!audioRef.current) {
+      audioRef.current = new Audio("/order-alert.mp3");
+      audioRef.current.preload = "auto";
+      audioRef.current.loop = false;
+    }
 
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -70,21 +74,35 @@ export default function OwnerDashboard() {
       setItems(getInitialMenuItems());
 
       const unsubscribeOrders = listenToOrders((firebaseOrders) => {
+        const currentOrderIds = new Set(
+          firebaseOrders
+            .map((order) => order.id)
+            .filter((id): id is string => Boolean(id)),
+        );
+
+        const newPendingOrders = firebaseOrders.filter(
+          (order) =>
+            order.status === "Pending" &&
+            order.id &&
+            !knownOrderIdsRef.current.has(order.id),
+        );
+
         if (
           soundEnabledRef.current &&
-          lastOrderCountRef.current !== 0 &&
-          firebaseOrders.length > lastOrderCountRef.current
+          knownOrderIdsRef.current.size !== 0 &&
+          newPendingOrders.length > 0 &&
+          audioRef.current
         ) {
-          if (audioRef.current) {
-            audioRef.current.loop = true;
-            audioRef.current.currentTime = 0;
+          audioRef.current.pause();
+          audioRef.current.loop = true;
+          audioRef.current.currentTime = 0;
 
-            audioRef.current.play().catch((err) => {
-              console.log(err);
-            });
-          }
+          audioRef.current.play().catch((err) => {
+            console.log("Audio blocked:", err);
+          });
         }
 
+        knownOrderIdsRef.current = currentOrderIds;
         lastOrderCountRef.current = firebaseOrders.length;
         setOrders(firebaseOrders);
       });
@@ -101,29 +119,44 @@ export default function OwnerDashboard() {
       audioRef.current.currentTime = 0;
     }
   };
+
+  const disableSound = () => {
+    stopSound();
+
+    setSoundEnabled(false);
+    soundEnabledRef.current = false;
+
+    alert("Sound disabled");
+  };
+
   const enableSound = async () => {
     if (!audioRef.current) return;
 
     try {
+      soundEnabledRef.current = true;
+      setSoundEnabled(true);
+
       audioRef.current.volume = 1;
       audioRef.current.loop = false;
       audioRef.current.currentTime = 0;
 
       await audioRef.current.play();
 
-      setSoundEnabled(true);
-      soundEnabledRef.current = true;
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
 
-      alert("Sound enabled successfully");
+      alert("Order sound enabled successfully");
     } catch (error) {
       console.log(error);
-      alert("Browser blocked sound");
+      alert("Browser blocked sound. Click Enable Sound again.");
     }
   };
   const changeOrderStatus = async (
     id: string,
     status: FirebaseOrder["status"],
   ) => {
+    stopSound();
+
     await updateFirebaseOrderStatus(id, status);
   };
 
@@ -168,7 +201,7 @@ export default function OwnerDashboard() {
 
     setName("");
     setPrice("");
-    setCategory("Biryani");
+    setCategory("Main Course");
     setImage("");
   };
 
@@ -500,14 +533,14 @@ export default function OwnerDashboard() {
     };
 
     return (
-      <div className="bg-white text-black rounded-[28px] p-6 shadow-2xl">
+      <div className="bg-white text-black rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 shadow-2xl overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:justify-between gap-6">
           <div>
             <p className="uppercase text-xs font-black tracking-[0.25em] text-orange-500">
               {order.orderType}
             </p>
 
-            <h3 className="text-3xl font-black mt-2">{order.customer}</h3>
+            <h3 className="text-2xl sm:text-3xl font-black mt-2 break-words">{order.customer}</h3>
 
             <p className="text-lg mt-2 font-bold">Mobile: {order.phone}</p>
 
@@ -531,7 +564,7 @@ export default function OwnerDashboard() {
             </div>
           </div>
 
-          <div className="min-w-[250px]">
+          <div className="w-full lg:min-w-[250px]">
             <div
               className={`px-5 py-3 rounded-full text-center font-black ${
                 order.status === "Pending"
@@ -568,10 +601,10 @@ export default function OwnerDashboard() {
               </h2>
             </div>
 
-            <div className="flex flex-wrap gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 mt-6">
               <button
                 onClick={printBill}
-                className="bg-black text-white px-5 py-3 rounded-xl font-black"
+                className="bg-black text-white px-5 py-3 rounded-xl font-black w-full sm:w-auto"
               >
                 Print Bill
               </button>
@@ -580,14 +613,14 @@ export default function OwnerDashboard() {
                 <>
                   <button
                     onClick={() => changeOrderStatus(order.id!, "Accepted")}
-                    className="bg-green-500 text-white px-5 py-3 rounded-xl font-black"
+                    className="bg-green-500 text-white px-5 py-3 rounded-xl font-black w-full sm:w-auto"
                   >
                     Accept
                   </button>
 
                   <button
                     onClick={() => changeOrderStatus(order.id!, "Rejected")}
-                    className="bg-red-500 text-white px-5 py-3 rounded-xl font-black"
+                    className="bg-red-500 text-white px-5 py-3 rounded-xl font-black w-full sm:w-auto"
                   >
                     Reject
                   </button>
@@ -597,7 +630,7 @@ export default function OwnerDashboard() {
               {order.status === "Accepted" && order.id && (
                 <button
                   onClick={() => changeOrderStatus(order.id!, "Preparing")}
-                  className="bg-orange-500 text-black px-5 py-3 rounded-xl font-black"
+                  className="bg-orange-500 text-black px-5 py-3 rounded-xl font-black w-full sm:w-auto"
                 >
                   Preparing
                 </button>
@@ -606,7 +639,7 @@ export default function OwnerDashboard() {
               {order.status === "Preparing" && order.id && (
                 <button
                   onClick={() => changeOrderStatus(order.id!, "Served")}
-                  className="bg-black text-white px-5 py-3 rounded-xl font-black"
+                  className="bg-black text-white px-5 py-3 rounded-xl font-black w-full sm:w-auto"
                 >
                   Served
                 </button>
@@ -618,8 +651,8 @@ export default function OwnerDashboard() {
     );
   };
   return (
-    <main className="min-h-screen bg-black text-white p-4 sm:p-6 md:p-10">
-      <div className="max-w-7xl mx-auto">
+    <main className="min-h-screen bg-black text-white w-full overflow-x-hidden px-3 sm:px-6 md:px-10 py-4">
+      <div className="w-full max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
             <p className="uppercase tracking-[0.3em] text-orange-400 font-black text-xs sm:text-sm">
@@ -634,20 +667,27 @@ export default function OwnerDashboard() {
           <div className="flex flex-col sm:flex-row gap-4">
             <a
               href="/owner-dashboard/qr"
-              className="bg-white text-black px-6 sm:px-8 py-4 rounded-2xl font-black text-center"
+              className="bg-white text-black px-6 sm:px-8 py-4 rounded-2xl font-black text-center w-full sm:w-auto"
             >
               Table QR Codes
             </a>
             <button
               onClick={enableSound}
-              className="bg-green-500 text-white px-6 sm:px-8 py-4 rounded-2xl font-black"
+              className="bg-green-500 text-white px-6 sm:px-8 py-4 rounded-2xl font-black w-full sm:w-auto"
             >
               Enable Sound
             </button>
 
             <button
+              onClick={disableSound}
+              className="bg-red-500 text-white px-6 sm:px-8 py-4 rounded-2xl font-black w-full sm:w-auto"
+            >
+              Disable Sound
+            </button>
+
+            <button
               onClick={logout}
-              className="bg-orange-500 text-black px-6 sm:px-8 py-4 rounded-2xl font-black"
+              className="bg-orange-500 text-black px-6 sm:px-8 py-4 rounded-2xl font-black w-full sm:w-auto"
             >
               Sign Out
             </button>
@@ -908,17 +948,9 @@ export default function OwnerDashboard() {
               onChange={(e) => setCategory(e.target.value)}
               className="p-4 rounded-2xl text-base sm:text-lg font-bold outline-none"
             >
-              <option>Biryani</option>
-              <option>Starters</option>
-              <option>Veg Starters</option>
-              <option>Curries</option>
-              <option>Veg</option>
-              <option>Rice & Noodles</option>
-              <option>Bread & Meals</option>
-              <option>Soups</option>
-              <option>Egg</option>
-              <option>Desserts</option>
-              <option>Beverages</option>
+              {menuCategories.map((menuCategory) => (
+                <option key={menuCategory}>{menuCategory}</option>
+              ))}
             </select>
 
             <input
@@ -989,7 +1021,7 @@ export default function OwnerDashboard() {
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 mt-6">
               <button
                 onClick={() => {
                   setSelectedMenuCategory("");
@@ -1097,7 +1129,7 @@ export default function OwnerDashboard() {
                       {item.category}
                     </p>
 
-                    <div className="flex flex-wrap gap-3 mt-6">
+                    <div className="flex flex-col sm:flex-row flex-wrap gap-3 mt-6">
                       <button
                         onClick={() => toggleItem(item.id)}
                         className={`px-5 py-3 rounded-xl font-black text-sm ${

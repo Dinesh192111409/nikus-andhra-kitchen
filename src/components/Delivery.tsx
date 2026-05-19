@@ -39,6 +39,7 @@ export default function Delivery() {
       ...prev,
       [name]: (prev[name] || 0) + 1,
     }));
+
     setPaymentDone(false);
   };
 
@@ -47,6 +48,7 @@ export default function Delivery() {
       ...prev,
       [name]: prev[name] > 1 ? prev[name] - 1 : 0,
     }));
+
     setPaymentDone(false);
   };
 
@@ -59,12 +61,14 @@ export default function Delivery() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const link = `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+
         setLocationLink(link);
+
         alert("Location added successfully");
       },
       () => {
         alert("Location permission denied");
-      }
+      },
     );
   };
 
@@ -78,13 +82,15 @@ export default function Delivery() {
     orderType === "Pickup"
       ? 0
       : selectedArea.km === 0
-      ? 0
-      : selectedArea.km <= 5
-      ? 0
-      : (selectedArea.km - 5) * 15;
+        ? 0
+        : selectedArea.km <= 5
+          ? 0
+          : (selectedArea.km - 5) * 15;
 
   const packingCharge = Number(containerCharge) || 0;
+
   const gst = itemsTotal * 0.05;
+
   const grandTotal = itemsTotal + gst + deliveryCharge + packingCharge;
 
   const canShowBill =
@@ -105,7 +111,9 @@ export default function Delivery() {
         ...items
           .filter((item) => cart[item.name] > 0)
           .map((item) => `${item.name} x ${cart[item.name]}`),
-        orderType === "Delivery" ? `Address: ${address}` : "Pickup from restaurant",
+        orderType === "Delivery"
+          ? `Address: ${address}`
+          : "Pickup from restaurant",
         locationLink ? `Location: ${locationLink}` : "Location: Not shared",
         `Container Charge: ₹${packingCharge.toFixed(2)}`,
       ],
@@ -122,29 +130,29 @@ export default function Delivery() {
   return (
     <section
       id="delivery"
-      className="bg-[#111111] text-white py-16 sm:py-20 md:py-28 px-4 sm:px-6"
+      className="bg-[#111111] text-white py-16 sm:py-20 md:py-28 px-3 sm:px-6 overflow-x-hidden"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full max-w-7xl mx-auto">
         <div className="text-center mb-14 md:mb-20">
-          <p className="uppercase tracking-[0.25em] sm:tracking-[0.4em] text-orange-400 text-xs sm:text-sm font-black">
+          <p className="uppercase tracking-[0.18em] sm:tracking-[0.4em] text-orange-400 text-[10px] sm:text-sm font-black">
             Delivery & Pickup
           </p>
 
-          <h2 className="text-4xl sm:text-5xl md:text-7xl font-black mt-6 leading-tight">
+          <h2 className="text-3xl sm:text-5xl md:text-7xl font-black mt-6 leading-tight break-words">
             SELECT FOOD
             <br />
             AUTO BILLING
           </h2>
 
-          <p className="text-gray-400 text-base sm:text-lg md:text-xl mt-8 max-w-3xl mx-auto leading-8 md:leading-9">
+          <p className="text-gray-400 text-sm sm:text-base md:text-xl mt-8 max-w-3xl mx-auto leading-7 md:leading-9">
             Customer can choose delivery or pickup, add address, share location,
             select food and complete payment.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 md:gap-16">
-          <div className="bg-black border border-orange-500/20 rounded-[28px] md:rounded-[40px] p-5 sm:p-6 md:p-8 shadow-2xl">
-            <h3 className="text-3xl md:text-4xl font-black text-orange-400 mb-8">
+        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-8 md:gap-12 xl:gap-16 items-start">
+          <div className="bg-black border border-orange-500/20 rounded-[28px] md:rounded-[40px] p-4 sm:p-6 md:p-8 shadow-2xl overflow-hidden">
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-orange-400 mb-8">
               Select Items
             </h3>
 
@@ -152,10 +160,10 @@ export default function Delivery() {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white text-black p-4 sm:p-5 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-5"
+                  className="bg-white text-black p-4 sm:p-5 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-5 overflow-hidden"
                 >
-                  <div>
-                    <h4 className="text-lg sm:text-xl font-black">
+                  <div className="min-w-0">
+                    <h4 className="text-base sm:text-xl font-black break-words">
                       {item.name}
                     </h4>
 
@@ -167,12 +175,12 @@ export default function Delivery() {
                   {(cart[item.name] || 0) === 0 ? (
                     <button
                       onClick={() => addItem(item.name)}
-                      className="bg-black text-white px-5 sm:px-6 py-3 rounded-2xl font-black w-full sm:w-auto"
+                      className="bg-black text-white px-5 sm:px-6 py-3 rounded-2xl font-black w-full lg:w-auto"
                     >
                       ADD +
                     </button>
                   ) : (
-                    <div className="flex items-center justify-center gap-5 bg-black text-white px-5 py-3 rounded-2xl w-full sm:w-auto">
+                    <div className="flex items-center justify-center gap-5 bg-black text-white px-5 py-3 rounded-2xl w-full lg:w-auto">
                       <button
                         onClick={() => removeItem(item.name)}
                         className="text-2xl font-black"
@@ -197,12 +205,12 @@ export default function Delivery() {
             </div>
           </div>
 
-          <div className="bg-orange-500 text-black rounded-[28px] md:rounded-[40px] p-5 sm:p-7 md:p-10 shadow-2xl">
-            <h3 className="text-4xl md:text-5xl font-black">
+          <div className="bg-orange-500 text-black rounded-[28px] md:rounded-[40px] p-4 sm:p-7 md:p-10 shadow-2xl overflow-hidden">
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-black break-words">
               Order Details
             </h3>
 
-            <div className="grid grid-cols-2 gap-4 mt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
               <button
                 onClick={() => {
                   setOrderType("Delivery");
@@ -238,7 +246,7 @@ export default function Delivery() {
                 placeholder="Customer Name"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold outline-none"
+                className="w-full p-4 md:p-5 rounded-2xl text-base md:text-xl font-bold outline-none"
               />
 
               <input
@@ -246,7 +254,7 @@ export default function Delivery() {
                 placeholder="Phone Number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold outline-none"
+                className="w-full p-4 md:p-5 rounded-2xl text-base md:text-xl font-bold outline-none"
               />
 
               {orderType === "Delivery" && (
@@ -255,7 +263,7 @@ export default function Delivery() {
                     placeholder="Full Delivery Address"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="w-full p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold outline-none min-h-[120px]"
+                    className="w-full p-4 md:p-5 rounded-2xl text-base md:text-xl font-bold outline-none min-h-[120px]"
                   />
 
                   <button
@@ -269,13 +277,14 @@ export default function Delivery() {
                     <a
                       href={locationLink}
                       target="_blank"
-                      className="block bg-black text-white p-4 rounded-2xl text-center font-black"
+                      rel="noreferrer"
+                      className="block bg-black text-white p-4 rounded-2xl text-center font-black break-words"
                     >
                       View Shared Location
                     </a>
                   )}
 
-                  <label className="block text-lg md:text-xl font-black">
+                  <label className="block text-base md:text-xl font-black">
                     Select Customer Area
                   </label>
 
@@ -283,7 +292,7 @@ export default function Delivery() {
                     value={selectedArea.name}
                     onChange={(e) => {
                       const area = areas.find(
-                        (a) => a.name === e.target.value
+                        (a) => a.name === e.target.value,
                       );
 
                       if (area) {
@@ -292,7 +301,7 @@ export default function Delivery() {
                         setPaymentDone(false);
                       }
                     }}
-                    className="w-full p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold outline-none"
+                    className="w-full p-4 md:p-5 rounded-2xl text-base md:text-xl font-bold outline-none"
                   >
                     {areas.map((area) => (
                       <option key={area.name} value={area.name}>
@@ -308,13 +317,13 @@ export default function Delivery() {
                 placeholder="Container / Packing Charge"
                 value={containerCharge}
                 onChange={(e) => setContainerCharge(e.target.value)}
-                className="w-full p-4 md:p-5 rounded-2xl text-lg md:text-xl font-bold outline-none"
+                className="w-full p-4 md:p-5 rounded-2xl text-base md:text-xl font-bold outline-none"
               />
             </div>
 
             {!canShowBill && (
-              <div className="bg-black text-white rounded-[28px] md:rounded-[35px] p-6 md:p-8 mt-10">
-                <p className="text-lg md:text-xl">
+              <div className="bg-black text-white rounded-[28px] md:rounded-[35px] p-5 md:p-8 mt-10">
+                <p className="text-base md:text-xl">
                   Add items, customer name, phone and required details to
                   continue.
                 </p>
@@ -323,7 +332,7 @@ export default function Delivery() {
 
             {canShowBill && (
               <>
-                <div className="bg-black text-white rounded-[28px] md:rounded-[35px] p-6 md:p-8 mt-10 space-y-5">
+                <div className="bg-black text-white rounded-[28px] md:rounded-[35px] p-5 md:p-8 mt-10 space-y-5 overflow-hidden">
                   <h3 className="text-2xl md:text-3xl font-black text-orange-400">
                     Order Summary
                   </h3>
@@ -333,56 +342,58 @@ export default function Delivery() {
                       cart[item.name] > 0 && (
                         <div
                           key={item.id}
-                          className="flex justify-between gap-5 text-base md:text-lg"
+                          className="flex flex-wrap justify-between gap-3 text-base md:text-lg"
                         >
-                          <span>
+                          <span className="break-words">
                             {item.name} × {cart[item.name]}
                           </span>
 
                           <span>₹{item.price * cart[item.name]}</span>
                         </div>
-                      )
+                      ),
                   )}
 
                   <div className="border-t border-white/20 pt-5 space-y-4">
-                    <div className="flex justify-between gap-4 text-lg md:text-xl">
+                    <div className="flex flex-wrap justify-between gap-3 text-base md:text-xl">
                       <span>Type</span>
                       <span>{orderType}</span>
                     </div>
 
                     {orderType === "Delivery" && (
                       <>
-                        <div className="flex justify-between gap-4 text-lg md:text-xl">
+                        <div className="flex flex-wrap justify-between gap-3 text-base md:text-xl">
                           <span>Area</span>
+
                           <span className="text-right">
                             {selectedArea.name}
                           </span>
                         </div>
 
-                        <div className="flex justify-between gap-4 text-lg md:text-xl">
+                        <div className="flex flex-wrap justify-between gap-3 text-base md:text-xl">
                           <span>Distance</span>
                           <span>{selectedArea.km} KM</span>
                         </div>
                       </>
                     )}
 
-                    <div className="flex justify-between gap-4 text-lg md:text-xl">
+                    <div className="flex flex-wrap justify-between gap-3 text-base md:text-xl">
                       <span>Items Total</span>
                       <span>₹{itemsTotal.toFixed(2)}</span>
                     </div>
 
-                    <div className="flex justify-between gap-4 text-lg md:text-xl">
+                    <div className="flex flex-wrap justify-between gap-3 text-base md:text-xl">
                       <span>GST 5%</span>
                       <span>₹{gst.toFixed(2)}</span>
                     </div>
 
-                    <div className="flex justify-between gap-4 text-lg md:text-xl">
+                    <div className="flex flex-wrap justify-between gap-3 text-base md:text-xl">
                       <span>Container Charge</span>
                       <span>₹{packingCharge.toFixed(2)}</span>
                     </div>
 
-                    <div className="flex justify-between gap-4 text-lg md:text-xl">
+                    <div className="flex flex-wrap justify-between gap-3 text-base md:text-xl">
                       <span>Delivery Charge</span>
+
                       <span>
                         {deliveryCharge === 0
                           ? "FREE"
@@ -390,7 +401,7 @@ export default function Delivery() {
                       </span>
                     </div>
 
-                    <div className="border-t border-white/20 pt-5 flex justify-between gap-4 text-2xl sm:text-3xl font-black text-orange-400">
+                    <div className="border-t border-white/20 pt-5 flex flex-wrap justify-between gap-4 text-xl sm:text-3xl font-black text-orange-400">
                       <span>Total</span>
                       <span>₹{grandTotal.toFixed(2)}</span>
                     </div>
@@ -434,22 +445,22 @@ export default function Delivery() {
                 </div>
 
                 {paymentMethod === "Online UPI" && (
-                  <div className="bg-white rounded-[28px] md:rounded-[35px] p-6 md:p-8 mt-10 text-center">
+                  <div className="bg-white rounded-[28px] md:rounded-[35px] p-5 md:p-8 mt-10 text-center overflow-hidden">
                     <h3 className="text-2xl md:text-3xl font-black">
                       Scan & Pay
                     </h3>
 
                     <Image
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=upi://pay?pa=nikusandhrakitchen@upi&pn=Nikus%20Andhra%20Kitchen&am=${grandTotal.toFixed(
-                        2
+                        2,
                       )}&cu=INR`}
                       alt="UPI QR"
                       width={260}
                       height={260}
-                      className="mx-auto mt-8 rounded-3xl border-4 border-black w-[220px] sm:w-[260px]"
+                      className="mx-auto mt-8 rounded-3xl border-4 border-black w-full max-w-[260px] h-auto"
                     />
 
-                    <p className="mt-5 text-lg md:text-xl font-black">
+                    <p className="mt-5 text-base md:text-xl font-black">
                       Amount: ₹{grandTotal.toFixed(2)}
                     </p>
 
@@ -458,13 +469,13 @@ export default function Delivery() {
                         saveDeliveryOrder("Online UPI");
                         setPaymentDone(true);
                       }}
-                      className="w-full mt-8 bg-green-500 text-black py-5 rounded-2xl text-lg md:text-xl font-black"
+                      className="w-full mt-8 bg-green-500 text-black py-5 rounded-2xl text-base md:text-xl font-black"
                     >
                       Payment Completed
                     </button>
 
                     {paymentDone && (
-                      <p className="text-green-700 text-xl md:text-2xl font-black mt-5">
+                      <p className="text-green-700 text-lg md:text-2xl font-black mt-5">
                         Payment Successful ✓ Order sent to owner dashboard.
                       </p>
                     )}
@@ -472,12 +483,12 @@ export default function Delivery() {
                 )}
 
                 {paymentMethod === "Pay On Delivery" && (
-                  <div className="bg-white rounded-[28px] md:rounded-[35px] p-6 md:p-8 mt-10">
+                  <div className="bg-white rounded-[28px] md:rounded-[35px] p-5 md:p-8 mt-10 overflow-hidden">
                     <h3 className="text-2xl md:text-3xl font-black">
                       Pay On Delivery Selected
                     </h3>
 
-                    <p className="text-lg md:text-xl mt-5 leading-8 md:leading-9">
+                    <p className="text-base md:text-xl mt-5 leading-7 md:leading-9">
                       Customer will pay ₹{grandTotal.toFixed(2)} during{" "}
                       {orderType.toLowerCase()}.
                     </p>
@@ -487,13 +498,13 @@ export default function Delivery() {
                         saveDeliveryOrder("Pay On Delivery");
                         setPaymentDone(true);
                       }}
-                      className="w-full mt-8 bg-black text-white py-5 rounded-2xl text-lg md:text-xl font-black"
+                      className="w-full mt-8 bg-black text-white py-5 rounded-2xl text-base md:text-xl font-black"
                     >
                       Confirm Order
                     </button>
 
                     {paymentDone && (
-                      <p className="text-green-700 text-xl md:text-2xl font-black mt-5">
+                      <p className="text-green-700 text-lg md:text-2xl font-black mt-5">
                         Order Confirmed ✓ Sent to owner dashboard.
                       </p>
                     )}
