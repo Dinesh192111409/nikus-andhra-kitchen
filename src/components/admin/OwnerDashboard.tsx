@@ -10,6 +10,7 @@ import {
   FirebaseOrder,
   listenToOrders,
   updateFirebaseOrderStatus,
+  deleteFirebaseOrder,
 } from "../../utils/firebaseOrders";
 
 const getInitialMenuItems = (): MenuItem[] => {
@@ -252,17 +253,18 @@ export default function OwnerDashboard() {
     .reduce((sum, order) => sum + order.total, 0);
 
   const menuCategories = [
-    "Biryani",
-    "Starters",
-    "Veg Starters",
-    "Curries",
-    "Veg",
-    "Rice & Noodles",
-    "Bread & Meals",
+    "Main Course",
+    "Bread",
+    "Rice",
+    "Biriyani",
+    "Family Packs",
+    "Combos",
+    "Bucket Biriyani",
     "Soups",
-    "Egg",
-    "Desserts",
+    "Chinese",
+    "Starters",
     "Beverages",
+    "Desserts",
   ];
 
   const visibleMenuItems = items.filter((item) => {
@@ -327,6 +329,26 @@ export default function OwnerDashboard() {
     );
 
     saveMenu(updated);
+  };
+  const clearFilteredHistory = async () => {
+    if (filteredOrders.length === 0) {
+      alert("No orders found to clear");
+      return;
+    }
+
+    const confirmDelete = confirm(
+      `Are you sure you want to delete ${filteredOrders.length} filtered orders?`,
+    );
+
+    if (!confirmDelete) return;
+
+    await Promise.all(
+      filteredOrders
+        .filter((order) => order.id)
+        .map((order) => deleteFirebaseOrder(order.id!)),
+    );
+
+    alert("Selected history cleared");
   };
 
   const downloadPDF = () => {
@@ -699,12 +721,33 @@ export default function OwnerDashboard() {
               </p>
             </div>
 
-            <button
-              onClick={downloadPDF}
-              className="bg-orange-500 text-black px-6 py-4 rounded-2xl font-black"
-            >
-              Download PDF
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={() => {
+                  setFilterDate("");
+                  setFilterStatus("All");
+                  setFilterPayment("All");
+                  setFilterMonth("All");
+                  setFilterYear("All");
+                }}
+                className="bg-black text-white px-6 py-4 rounded-2xl font-black"
+              >
+                Clear Filters
+              </button>
+              <button
+                onClick={clearFilteredHistory}
+                className="bg-red-600 text-white px-6 py-4 rounded-2xl font-black"
+              >
+                Clear History
+              </button>
+
+              <button
+                onClick={downloadPDF}
+                className="bg-orange-500 text-black px-6 py-4 rounded-2xl font-black"
+              >
+                Download PDF
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mt-8">

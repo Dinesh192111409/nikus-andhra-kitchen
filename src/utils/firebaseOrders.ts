@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   onSnapshot,
   orderBy,
@@ -36,7 +37,7 @@ export type FirebaseOrder = {
 };
 
 export const createFirebaseOrder = async (
-  order: Omit<FirebaseOrder, "id" | "createdAt">
+  order: Omit<FirebaseOrder, "id" | "createdAt">,
 ) => {
   const docRef = await addDoc(collection(db, "orders"), {
     ...order,
@@ -46,13 +47,8 @@ export const createFirebaseOrder = async (
   return docRef.id;
 };
 
-export const listenToOrders = (
-  callback: (orders: FirebaseOrder[]) => void
-) => {
-  const q = query(
-    collection(db, "orders"),
-    orderBy("createdAt", "desc")
-  );
+export const listenToOrders = (callback: (orders: FirebaseOrder[]) => void) => {
+  const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
 
   return onSnapshot(q, (snapshot) => {
     const orders = snapshot.docs.map((docItem) => ({
@@ -66,7 +62,7 @@ export const listenToOrders = (
 
 export const listenToSingleOrder = (
   orderId: string,
-  callback: (order: FirebaseOrder | null) => void
+  callback: (order: FirebaseOrder | null) => void,
 ) => {
   return onSnapshot(doc(db, "orders", orderId), (snapshot) => {
     if (!snapshot.exists()) {
@@ -83,9 +79,12 @@ export const listenToSingleOrder = (
 
 export const updateFirebaseOrderStatus = async (
   orderId: string,
-  status: FirebaseOrderStatus
+  status: FirebaseOrderStatus,
 ) => {
   await updateDoc(doc(db, "orders", orderId), {
     status,
   });
+};
+export const deleteFirebaseOrder = async (orderId: string) => {
+  await deleteDoc(doc(db, "orders", orderId));
 };
